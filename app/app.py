@@ -4,6 +4,9 @@ from pathlib import Path
 import time
 import shutil
 import os
+import base64
+from PIL import Image
+import json
 
 
 def process_pdfs(files):
@@ -42,6 +45,40 @@ def enable():
     st.session_state['processed_files'] = False
 
 
+def displayPDF(uploaded_file):
+    uploaded_file = uploaded_file[0]
+
+    # Read file as bytes:
+    bytes_data = uploaded_file.getvalue()
+
+    # Convert to utf-8
+    base64_pdf = base64.b64encode(bytes_data).decode('utf-8')
+
+    # Embed PDF in HTML
+    pdf_display = F'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="700" ' \
+                  F'type="application/pdf"></iframe>'
+
+    # Display file
+    st.markdown(pdf_display, unsafe_allow_html=True)
+
+
+def display_mask():
+    st.write("#### Predicted masks for the first page:")
+    # load image file
+    image_file = Image.open("app/data/1603.09631_page_0001_dev_img_1_base_dla_result.jpg")
+    st.image(image_file, caption='Predicted masks for the first page:', use_column_width=True)
+
+
+def display_json():
+    st.write("#### JSON file for the first page:")
+
+    # load json file
+    with open("app/data/json from grobid.json", "r") as f:
+        json_file = json.load(f)
+
+    st.json(json_file)
+
+# -----------------------------------------------------------------------------------
 # Page configs
 st.set_page_config(layout='wide')
 
@@ -50,6 +87,7 @@ st.set_page_config(layout='wide')
 # shutil.rmtree('tmp', ignore_errors=True)
 # os.remove('processed_files.zip') if os.path.exists('processed_files.zip') else None
 
+# -----------------------------------------------------------------------------------
 # Session State
 # st.write(st.session_state)
 if 'processed_files' not in st.session_state:
@@ -57,6 +95,9 @@ if 'processed_files' not in st.session_state:
 if "disabled" not in st.session_state:
     st.session_state.disabled = False
 
+
+# -----------------------------------------------------------------------------------
+# UI logic
 # Title of the page
 st.title('📄 Clean Data is All You Need')
 
@@ -67,7 +108,8 @@ st.title('📄 Clean Data is All You Need')
 #     process_button = st.button('Process PDFs')  # , disabled=True)
 
 # Columns
-col1, col2, col3 = st.columns(3, gap='large')
+# 4 columns of different sizes
+col1, col2, col3, col4 = st.columns([1, 0.3, 1, 1], gap='large')
 with col1:
     uploaded_files = st.file_uploader("Upload PDFs", accept_multiple_files=True, type='pdf', on_change=enable)
 with col2:
@@ -76,17 +118,18 @@ with col2:
     st.write(" ")
     process_button = st.button('Process PDFs', type='primary', on_click=disable, disabled=st.session_state.disabled)
 
-# Main area
-# if uploaded_files:
-#     # enable process button
-#     if process_button.disabled:
-#         process_button.disabled = False
-
 if st.session_state.processed_files:
     with col3:
+        st.write(" ")
+        st.write(" ")
+        # st.write(" ")
         st.success('Processing complete!')
         with open('processed_files.zip', 'rb') as f:
             st.download_button(label=f'processed_files.zip', file_name=f'processed_files.zip', data=f)
+
+if uploaded_files:
+    with col1:
+        displayPDF(uploaded_files)
 
 if uploaded_files and process_button:
     with col3:
@@ -94,17 +137,14 @@ if uploaded_files and process_button:
             processed_files = process_pdfs(uploaded_files)
         st.success('Processing complete!')
         st.session_state.processed_files = True
-        # st.write('**Processed Files:**')
 
+        display_mask()
+
+    with col4:
         # zip processed files
-        shutil.make_archive('processed_files', 'zip', 'tmp')
+        shutil.make_archive('tmp/processed_files', 'zip', 'tmp')
 
-        # for file in processed_files:
-        #     # load file as binary
-        #     data = file.read_bytes()
-        #     file_name = file.stem[:-4]
-        #     st.download_button(label=f'{file_name}.txt', file_name=f'{file_name}.txt', data=data)
-        with open('processed_files.zip', 'rb') as f:
+        with open('tmp/processed_files.zip', 'rb') as f:
             download_btn = st.download_button(label=f'processed_files.zip', file_name=f'processed_files.zip', data=f)
-        # if download_btn:
-        #     st.write("**Files downloaded**")
+
+        display_json()
