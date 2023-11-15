@@ -36,7 +36,7 @@ The following is the json schema that describes the data and metadata extracted 
     "equations": [
         {
             "equation_id": "string",
-            "equation_text": "string",
+            "equation_latex": "string",
             "equation_page": "int",
             "equation_location": [...]
         },
