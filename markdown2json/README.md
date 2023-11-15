@@ -11,7 +11,9 @@ The following is the json schema that describes the data and metadata extracted 
         {
             "section_name": "string",
             "section_text": "string",
+            "section_annotation": "string",
             "section_page": "int",
+            "section_column": "int",
             "section_location": [...]
       },
         ...
@@ -19,8 +21,10 @@ The following is the json schema that describes the data and metadata extracted 
     "figures": [
         {
             "figure_id": "string",
+            "figure_annotation": "string"
             "figure_page": "int",
-            "figure_location": [...]
+            "figure_column": "int",
+            "figure_location": [...],
         },
         ...
     ],
@@ -28,7 +32,9 @@ The following is the json schema that describes the data and metadata extracted 
         {
             "table_id": "string",
             "table_text": "string",
+            "table_annotation": "string",
             "table_page": "int",
+            "table_column": "int",
             "table_location": [...]
         },
         ...
@@ -37,7 +43,9 @@ The following is the json schema that describes the data and metadata extracted 
         {
             "equation_id": "string",
             "equation_latex": "string",
+            "equation_annotation": "string",
             "equation_page": "int",
+            "equation_column": "int",
             "equation_location": [...]
         },
         ...
