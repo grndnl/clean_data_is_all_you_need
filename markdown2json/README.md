@@ -27,6 +27,7 @@ The following is the json schema that describes the data and metadata extracted 
     "tables": [
         {
             "table_id": "string",
+            "table_text": "string",
             "table_page": "int",
             "table_location": [...]
         },
