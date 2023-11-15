@@ -8,13 +8,38 @@ The following is the json schema that describes the data and metadata extracted 
     "paper_id": "string",
     "title": "string",
     "paper_text": [
-        0 : {
+        {
             "section_name": "string",
             "section_text": "string",
             "section_page": "int",
             "section_location": [...]
       },
         ...
-    ]
+    ],
+    "figures": [
+        {
+            "figure_id": "string",
+            "figure_page": "int",
+            "figure_location": [...]
+        },
+        ...
+    ],
+    "tables": [
+        {
+            "table_id": "string",
+            "table_page": "int",
+            "table_location": [...]
+        },
+        ...
+    ],
+    "equations": [
+        {
+            "equation_id": "string",
+            "equation_text": "string",
+            "equation_page": "int",
+            "equation_location": [...]
+        },
+        ...
+    ],
 }
 ```
