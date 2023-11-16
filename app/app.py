@@ -42,7 +42,7 @@ def disable():
 
 def enable():
     st.session_state.disabled = False
-    st.session_state['processed_files'] = False
+    st.session_state.processed_files = False
 
 
 def displayPDF(uploaded_file):
@@ -59,27 +59,34 @@ def displayPDF(uploaded_file):
                   F'type="application/pdf"></iframe>'
 
     # Display file
-    st.markdown(pdf_display, unsafe_allow_html=True)
+    with st.expander("Uploaded PDFs"):
+        st.markdown(pdf_display, unsafe_allow_html=True)
 
 
 def display_mask():
-    st.write("#### Predicted masks for the first page:")
+    # st.write("#### Predicted masks for the first page:")
     # load image file
     image_file = Image.open("app/data/1603.09631_page_0001_dev_img_1_base_dla_result.jpg")
-    st.image(image_file, caption='Predicted masks for the first page:', use_column_width=True)
+    with st.expander("Predicted masks"):
+        st.image(image_file, caption='Predicted masks for the first page:', use_column_width=True)
 
 
 def display_json():
-    st.write("#### JSON file for the first page:")
-
+    # st.write("#### JSON file for the first page:")
     # load json file
     with open("app/data/json from grobid.json", "r") as f:
         json_file = json.load(f)
 
-    st.json(json_file)
+    with st.expander("JSON Output"):
+        st.json(json_file)
 
-# -----------------------------------------------------------------------------------
-# Page configs
+
+def display_download_button():
+    with open('tmp/processed_files.zip', 'rb') as f:
+        download_btn = st.download_button(label=f'processed_files.zip', file_name=f'processed_files.zip', data=f)
+
+
+# ------------Page configs-----------------------------------------------------------------------
 st.set_page_config(layout='wide')
 
 # Clean local files  # TODO
@@ -87,64 +94,79 @@ st.set_page_config(layout='wide')
 # shutil.rmtree('tmp', ignore_errors=True)
 # os.remove('processed_files.zip') if os.path.exists('processed_files.zip') else None
 
-# -----------------------------------------------------------------------------------
-# Session State
+
+# ------------Session State-----------------------------------------------------------------------
 # st.write(st.session_state)
 if 'processed_files' not in st.session_state:
     st.session_state['processed_files'] = False
 if "disabled" not in st.session_state:
     st.session_state.disabled = False
 
-
-# -----------------------------------------------------------------------------------
-# UI logic
+# ----------UI logic-------------------------------------------------------------------------
 # Title of the page
 st.title('📄 Clean Data is All You Need')
 
 # Sidebar for navigation and control
-# with st.sidebar:
-#     st.header('Controls')
-#     uploaded_files = st.file_uploader("Upload PDFs", accept_multiple_files=True, type='pdf')
-#     process_button = st.button('Process PDFs')  # , disabled=True)
+with st.sidebar:
+    st.header('About')
+    # add information about what this page does
+    st.markdown('This is a tool for processing PDFs of scientific papers.')
 
-# Columns
-# 4 columns of different sizes
-col1, col2, col3, col4 = st.columns([1, 0.3, 1, 1], gap='large')
-with col1:
-    uploaded_files = st.file_uploader("Upload PDFs", accept_multiple_files=True, type='pdf', on_change=enable)
-with col2:
-    st.write(" ")
-    st.write(" ")
-    st.write(" ")
-    process_button = st.button('Process PDFs', type='primary', on_click=disable, disabled=st.session_state.disabled)
+    st.markdown('[GitHub](https://github.com/grndnl/clean_data_is_all_you_need)')
 
-if st.session_state.processed_files:
-    with col3:
-        st.write(" ")
-        st.write(" ")
-        # st.write(" ")
-        st.success('Processing complete!')
-        with open('processed_files.zip', 'rb') as f:
-            st.download_button(label=f'processed_files.zip', file_name=f'processed_files.zip', data=f)
+# Tabs
+tab1, tab2 = st.tabs(["Demo", "Documentation"])
 
-if uploaded_files:
+with tab1:
+    # Columns
+    # 4 columns of different sizes
+    col1, col2, col3, col4 = st.columns([1, 0.3, 1, 1], gap='large')
     with col1:
-        displayPDF(uploaded_files)
+        uploaded_files = st.file_uploader("Upload PDFs", accept_multiple_files=True, type='pdf', on_change=enable)
+    with col2:
+        st.write(" ")
+        st.write(" ")
+        st.write(" ")
+        process_button = st.button('Process PDFs', type='primary', on_click=disable, disabled=st.session_state.disabled)
 
-if uploaded_files and process_button:
-    with col3:
-        with st.spinner('Processing PDFs...'):
-            processed_files = process_pdfs(uploaded_files)
-        st.success('Processing complete!')
-        st.session_state.processed_files = True
+    if st.session_state.processed_files:
+        with col3:
+            st.write(" ")
+            st.write(" ")
+            # st.write(" ")
+            st.success('Processing complete!')
 
-        display_mask()
+    if uploaded_files:
+        with col1:
+            displayPDF(uploaded_files)
 
-    with col4:
-        # zip processed files
-        shutil.make_archive('tmp/processed_files', 'zip', 'tmp')
+    if st.session_state.processed_files:  # Saved state necessary for clean debugging when deployed locally
+        with col3:
+            display_mask()
+        with col4:
+            display_download_button()
+            display_json()
 
-        with open('tmp/processed_files.zip', 'rb') as f:
-            download_btn = st.download_button(label=f'processed_files.zip', file_name=f'processed_files.zip', data=f)
+    if uploaded_files and process_button:
+        with col3:
+            with st.spinner('Processing PDFs...'):
+                processed_files = process_pdfs(uploaded_files)
+            st.success('Processing complete!')
+            st.session_state.processed_files = True
 
-        display_json()
+            display_mask()
+
+        with col4:
+            # zip processed files
+            shutil.make_archive('tmp/processed_files', 'zip', 'tmp')
+
+            # if not st.session_state.processed_files:
+            display_download_button()
+
+            display_json()
+
+
+# ----------Documentation-----------------------------------------------------------------------------
+with tab2:
+    st.markdown("# Overview")
+    st.markdown("# Method")
