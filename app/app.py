@@ -64,22 +64,28 @@ def displayPDF(uploaded_files):
         st.markdown(" ".join(pdf_displays), unsafe_allow_html=True)
 
 
-def display_mask():
-    # st.write("#### Predicted masks for the first page:")
-    # load image file
-    image_file = Image.open("app/data/1603.09631_page_0001_dev_img_1_base_dla_result.jpg")
+def display_mask(upload_files):
     with st.expander("Identified sections"):
-        st.image(image_file, caption='Predicted masks for the first page', use_column_width=True)
+        for uploaded_file in upload_files:
+            name = uploaded_file.name
+
+            # load image file
+            image_file = Image.open("app/data/1603.09631_page_0001_dev_img_1_base_dla_result.jpg")
+
+            st.markdown(f"**{name}**")
+            st.image(image_file, width=200)  # , caption='Predicted masks for the first page'use_column_width=True)
 
 
-def display_json():
-    # st.write("#### JSON file for the first page:")
-    # load json file
-    with open("app/data/json from grobid.json", "r") as f:
-        json_file = json.load(f)
-
+def display_json(upload_files):
     with st.expander("JSON Output"):
-        st.json(json_file)
+        for uploaded_file in upload_files:
+            name = uploaded_file.name
+            # load json file
+            with open("app/data/json from grobid.json", "r") as f:
+                json_file = json.load(f)
+
+            st.markdown(f"**{name[:-3]}.json**")
+            st.json(json_file, expanded=False)
 
 
 def display_download_button():
@@ -143,10 +149,10 @@ with tab1:
 
     if st.session_state.processed_files:  # Saved state necessary for clean debugging when deployed locally
         with col3:
-            display_mask()
+            display_mask(uploaded_files)
         with col4:
             display_download_button()
-            display_json()
+            display_json(uploaded_files)
 
     if uploaded_files and process_button:
         with col3:
@@ -155,14 +161,14 @@ with tab1:
             st.success('Processing complete!')
             st.session_state.processed_files = True
 
-            display_mask()
+            display_mask(uploaded_files)
 
         with col4:
             # zip processed files
             shutil.make_archive('tmp/processed_files', 'zip', 'tmp')
 
             display_download_button()
-            display_json()
+            display_json(uploaded_files)
 
 
 # ----------Documentation-----------------------------------------------------------------------------
