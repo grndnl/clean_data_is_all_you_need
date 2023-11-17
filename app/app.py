@@ -45,30 +45,31 @@ def enable():
     st.session_state.processed_files = False
 
 
-def displayPDF(uploaded_file):
-    uploaded_file = uploaded_file[0]
+def displayPDF(uploaded_files):
+    pdf_displays = []
+    for uploaded_file in uploaded_files:
+        # Read file as bytes:
+        bytes_data = uploaded_file.getvalue()
 
-    # Read file as bytes:
-    bytes_data = uploaded_file.getvalue()
+        # Convert to utf-8
+        base64_pdf = base64.b64encode(bytes_data).decode('utf-8')
 
-    # Convert to utf-8
-    base64_pdf = base64.b64encode(bytes_data).decode('utf-8')
-
-    # Embed PDF in HTML
-    pdf_display = F'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="700" ' \
-                  F'type="application/pdf"></iframe>'
+        # Embed PDF in HTML
+        pdf_display = F'<iframe src="data:application/pdf;base64,{base64_pdf}" width="40%" height="350" ' \
+                      F'type="application/pdf"></iframe>'
+        pdf_displays.append(pdf_display)
 
     # Display file
     with st.expander("Uploaded PDFs"):
-        st.markdown(pdf_display, unsafe_allow_html=True)
+        st.markdown(" ".join(pdf_displays), unsafe_allow_html=True)
 
 
 def display_mask():
     # st.write("#### Predicted masks for the first page:")
     # load image file
     image_file = Image.open("app/data/1603.09631_page_0001_dev_img_1_base_dla_result.jpg")
-    with st.expander("Predicted masks"):
-        st.image(image_file, caption='Predicted masks for the first page:', use_column_width=True)
+    with st.expander("Identified sections"):
+        st.image(image_file, caption='Predicted masks for the first page', use_column_width=True)
 
 
 def display_json():
@@ -160,9 +161,7 @@ with tab1:
             # zip processed files
             shutil.make_archive('tmp/processed_files', 'zip', 'tmp')
 
-            # if not st.session_state.processed_files:
             display_download_button()
-
             display_json()
 
 
