@@ -95,11 +95,7 @@ To get a prediction of a PDF file by making a POST request to http://127.0.0.1:8
 The response is a string with the markdown text of the document.
 
 ```sh
-curl -X 'POST' \
-  'http://127.0.0.1:8503/predict/' \
-  -H 'accept: application/json' \
-  -H 'Content-Type: multipart/form-data' \
-  -F 'file=@<PDFFILE.pdf>;type=application/pdf'
+curl -X 'POST' 'http://127.0.0.1:8503/predict/?start=1&stop=2' -H 'accept: application/json' -H 'Content-Type: multipart/form-data' -F 'file=@<data/2105.03011v1.pdf>;type=application/pdf'
 ```
 To use the limit the conversion to pages 1 to 5, use the start/stop parameters in the request URL: http://127.0.0.1:8503/predict/?start=1&stop=5
 
