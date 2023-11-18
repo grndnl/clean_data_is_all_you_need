@@ -5,6 +5,7 @@
 The following is the json schema that describes the data and metadata extracted from a scientific paper using our pipeline: 
 ```json
 {
+    "pdf_file": "string",
     "paper_id": "string",
     "title": "string",
     "paper_text": [
