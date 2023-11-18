@@ -55,9 +55,9 @@ def displayPDF(uploaded_files):
         base64_pdf = base64.b64encode(bytes_data).decode('utf-8')
 
         # Embed PDF in HTML
-        # pdf_display = F'<iframe src="data:application/pdf;base64,{base64_pdf}" width="40%" height="350" ' \
-        #               F'type="application/pdf"></iframe>'
-        pdf_display = f'<embed src="data:application/pdf;base64,{base64_pdf}" width="40%" height="350" type="application/pdf">'
+        pdf_display = F'<iframe src="data:application/pdf;base64,{base64_pdf}" width="40%" height="350" ' \
+                      F'type="application/pdf"></iframe>'
+        # pdf_display = f'<embed src="data:application/pdf;base64,{base64_pdf}" width="40%" height="350" type="application/pdf">'
         pdf_displays.append(pdf_display)
 
     # Display file
