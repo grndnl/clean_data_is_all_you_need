@@ -176,6 +176,7 @@ with tab1:
             st.success('Processing complete!')
             st.session_state.processed_files = True
 
+            time.sleep(1)
             display_mask(uploaded_files)
 
             time.sleep(1)
@@ -185,7 +186,9 @@ with tab1:
             shutil.make_archive('tmp/processed_files', 'zip', 'tmp')
 
             display_download_button()
+            time.sleep(1)
             display_json(uploaded_files)
+            time.sleep(1)
             display_markdown(uploaded_files)
 
 
