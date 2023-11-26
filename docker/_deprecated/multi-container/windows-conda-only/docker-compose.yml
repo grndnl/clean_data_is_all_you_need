@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  conda-main:
+    image: conda-main:latest
+    stdin_open: true
+    tty: true
+    volumes:
+      - /mnt/y:/user
+    expose:
+      - "8888"
+    ports:
+      - "8888:8888"

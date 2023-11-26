@@ -1,0 +1,9 @@
+DIRECTORIES:
+  DATA_DIRECTORY: "/user/w210/data"
+
+MODEL:
+  DIT:
+    MODEL_WEIGHTS: "/user/w210/model_weights/DiT/publaynet_dit-b_mrcnn.zip"
+      
+  LAYOUTLMV3:
+    MODEL_WEIGHTS: "/user/w210/model_weights/LayoutLMV3/base-finetuned-publaynet/model_final.pth"

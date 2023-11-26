@@ -34,6 +34,7 @@ from dla_pipeline_support_functions import (
     get_batch,
     get_content_cluster_masks_bar_scan,
     get_content_cluster_masks_contours,
+    get_filename_without_extension,
     invert_mask_polarity,
     list_files_with_extensions,
     pad_mask_perimeter,
@@ -122,7 +123,6 @@ class DLAModelDetection:
         return is_initialized
 
     def initialize_from_dit_model_output_old(self, model_output, categories):
-
         self.categories = categories
 
         out_dict = model_output.get_fields()
@@ -202,7 +202,6 @@ class DLAModelDetection:
         y1f=None,
         box_buffer=2.0,
     ):
-
         self.page_id = page_id
 
         self.categories = categories
@@ -269,7 +268,6 @@ class DLAVisualizer(Visualizer):
         super().__init__(img_rgb, metadata, scale, instance_mode)
 
     def draw_instance_predictions(self, predictions):
-
         boxes = [detect.box for detect in predictions]
         scores = [detect.score for detect in predictions]
         classes = [detect.category for detect in predictions]
@@ -327,6 +325,7 @@ class PDF_DocumentGroup:
         # DLA
         self.dla_categories = dla_categories
         self.dla_score_groups = dla_score_groups
+        self.dla_processing_summary = []
 
     def initialize_document_set(self):
         # Documents
@@ -355,7 +354,14 @@ class PDF_DocumentGroup:
     def document_list(self):
         doc_list = []
         for doc in self.documents.values():
-            doc_list.append({"title": doc.title, "path": doc.path})
+            doc_list.append(
+                {
+                    "title": doc.title,
+                    "file_name": doc.file_name,
+                    "path": doc.path,
+                    "page_count": doc.num_pages,
+                }
+            )
 
         return doc_list
 
@@ -419,7 +425,11 @@ class PDF_DocumentGroup:
             im_list.append(
                 {
                     "title": im.title,
+                    "file_name": im.file_name,
                     "path": im.image_path,
+                    "document": im.document.file_name,
+                    "page_no": im.page_number,
+                    "processing_complete": im.is_processing_complete(),
                 }
             )
 
@@ -446,7 +456,10 @@ class PDF_DocumentGroup:
     def save_masks(self, page, use_rectangular_masks):
         root_file_name = join(self.page_masks_directory, f"{page.title}_mask_")
 
-        if page.is_initialized:
+        if len(page.page_detections) == 0:
+            self.add_to_log_dict(f"No DLA detections found on {page.title}")
+
+        elif page.is_initialized:
             # df = page.summary_df.reset_index()
             # df.rename(columns={"index": "mask_id"}, inplace=True)
 
@@ -485,7 +498,7 @@ class PDF_DocumentGroup:
             df["mask_id"] = new_index
             df["mask_img_file_names"] = masked_img_file_name_list
             df["mask_file_names"] = mask_file_name_list
-            df.to_csv(root_file_name + "mask_summary.csv", index=True)
+            df.to_csv(root_file_name + "summary.csv", index=True)
 
             return df
         else:
@@ -553,6 +566,10 @@ class PDF_DocumentGroup:
 
         start = datetime.now()
         for i, page in enumerate(self.pages.values()):
+            # PROCESS ERROR Probe (comment when not in use)
+            # if i==11:
+            #     raise Exception("DEBUG: Intentional error")
+
             if i % 10 == 0:
                 ratio = ((i + 1) / len(self.pages)) * 100
                 self.add_to_log_dict(
@@ -568,6 +585,9 @@ class PDF_DocumentGroup:
                 h_pad=h_pad,
                 pad_limit_categories=pad_limit_categories,
             )
+
+            page.set_processing_complete()
+
             self.save_development_images(page=page)
             new_registry = self.save_masks(
                 page=page, use_rectangular_masks=use_rectangular_masks
@@ -618,11 +638,34 @@ class PDF_DocumentGroup:
             raise Exception(e)
 
     def save_mask_registry(self):
-        try:
-            file_path = join(self.page_masks_directory, "mask_registry.csv")
-            self.mask_registry.to_csv(file_path, index=True)
+        file_path = join(self.page_masks_directory, "mask_registry.csv")
 
-            self.add_to_log_dict(f"MASK Registry: {file_path}, saved")
+        try:
+            f_list = list_files_with_extensions(self.page_masks_directory, ["csv"])
+
+            if len(f_list) > 0:
+                mask_registry = pd.DataFrame()
+
+                for f in f_list:
+                    if f.endswith("mask_summary.csv"):
+                        new_registry = pd.read_csv(f, index_col=False)
+
+                        mask_registry = pd.concat(
+                            [mask_registry, new_registry], axis=0, ignore_index=True
+                        )
+
+                mask_registry.sort_values(
+                    by=["document", "page_no", "mask_id"], inplace=True
+                )
+                mask_registry.drop("Unnamed: 0", axis=1, inplace=True)
+
+                mask_registry.to_csv(file_path, index=True)
+
+                self.add_to_log_dict(f"MASK Registry: {file_path}, saved")
+
+            else:
+                self.add_to_log_dict(f"ERROR saving {file_path}.")
+                self.add_to_log_dict(f"No masks found!!!")
         except Exception as e:
             self.add_to_log_dict(f"ERROR saving {file_path}.")
             self.add_to_log_dict(e)
@@ -638,7 +681,6 @@ class PDF_DocumentGroup:
         pad_limit_categories: list = None,
         clear_data_after: bool = False,
     ):
-
         self.add_to_log_dict("Loading page images")
         self.load_page_images()
 
@@ -686,6 +728,17 @@ class PDF_DocumentGroup:
 
             for k in empty_pages_set:
                 pg = self.pages.pop(k)
+
+                self.dla_processing_summary.append(
+                    {
+                        "file_name": pg.file_name,
+                        "document": pg.document.file_name,
+                        "page_no": pg.page_number,
+                        "dla_entity_count": 0,
+                        "processing_complete": True,
+                    }
+                )
+
                 self.add_to_log_dict(
                     f"NO DLA Detections found in {pg.title}, removed from set"
                 )
@@ -719,6 +772,63 @@ class PDF_DocumentGroup:
             self.add_to_log_dict(f"ERROR Saving {file_path}")
             self.add_to_log_dict(e)
 
+    def save_document_list(self):
+        try:
+            file_path = join(self.output_directory, "document_list.csv")
+
+            df = self.document_list_df.drop(["title", "path"], axis=1)
+            df.to_csv(file_path, index=False)
+
+            self.add_to_log_dict(f"Saved {file_path}")
+        except Exception as e:
+            self.add_to_log_dict(f"ERROR Saving {file_path}")
+            self.add_to_log_dict(e)
+
+    def save_page_images_list(self):
+        # TODO: This implementation is redundant with other features.
+        # Should clean this up.
+
+        try:
+            file_path = join(self.output_directory, "page_images_list.csv")
+
+            for pg in self.pages.values():
+                self.dla_processing_summary.append(
+                    {
+                        "file_name": pg.file_name,
+                        "document": pg.document.file_name,
+                        "page_no": pg.page_number,
+                        "dla_entity_count": len(pg.page_detections),
+                        "processing_complete": pg.is_processing_complete(),
+                    }
+                )
+
+            df = pd.DataFrame(self.dla_processing_summary)
+            df.sort_values(by=["document", "page_no"], inplace=True)
+
+            df.to_csv(file_path, index=False)
+
+            self.add_to_log_dict(f"Saved {file_path}")
+        except Exception as e:
+            self.add_to_log_dict(f"ERROR Saving {file_path}")
+            self.add_to_log_dict(e)
+
+    def remove_pre_processed_pages(self):
+        try:
+            file_path = join(self.output_directory, "page_images_list.csv")
+            page_images_list = pd.read_csv(file_path)
+
+            for i in range(len(page_images_list)):
+                row = page_images_list.iloc[i, :]
+                pg_title = get_filename_without_extension(row["file_name"])
+                if row["processing_complete"] and row["dla_entity_count"] > 0:
+                    self.dla_processing_summary.append(row.to_dict())
+                    pg = self.pages.pop(pg_title)
+                    self.add_to_log_dict(f"Results for {pg.title} found", verbose=False)
+
+        except Exception as e:
+            self.add_to_log_dict(f"ERROR in 'remove_pre_processed_pages'")
+            self.add_to_log_dict(e)
+
 
 class PDF_DocumentSet(PDF_DocumentGroup):
     def __init__(
@@ -750,7 +860,6 @@ class PDF_DocumentSet(PDF_DocumentGroup):
         pad_limit_categories: list = None,
         clear_data_after: bool = False,
     ):
-
         full_pages_list = list(self.pages.values())
 
         batch_count = int(np.ceil(len(full_pages_list) / batch_size))
@@ -862,6 +971,7 @@ class PDF_Page:
         self.dla_categories = dla_categories
         self.__page_detections = []
         self.is_initialized = False
+        self.__processing_complete = False
 
     def __repr__(self) -> str:
         return self.title
@@ -877,7 +987,6 @@ class PDF_Page:
     def pad_masks(
         self, padding: int = 0, limit_categories=None, use_rectangular_masks=False
     ):
-
         if padding > 0:
             padded_detections = []
 
@@ -885,7 +994,6 @@ class PDF_Page:
                 limit_categories = self.dla_categories
 
             for dla in self.page_detections:
-
                 if dla.category in limit_categories:
                     mask = dla.rect_mask if use_rectangular_masks else dla.mask
 
@@ -1108,63 +1216,64 @@ class PDF_Page:
     def filter_page_detections_based_on_overlap(
         self, filled_threshold: float = 1e-4, use_rectangular_masks: bool = False
     ):
-        mask_list, summary_df = self.get_mask_list(
-            by="score", ascending=True, use_rectangular_masks=use_rectangular_masks
-        )
-
-        if len(mask_list) > 1:
-            overlapped_mask_list = crop_stacks_2(mask_list)
-        else:
-            overlapped_mask_list = mask_list
-
-        processed_page_detections = []
-
-        for i in summary_df.index:
-            dla = self.page_detections[i]
-            overlapped_mask = overlapped_mask_list[i]
-
-            masked_img, cropped_img, _, cropped_mask = apply_mask_to_image(
-                img=self.image,
-                mask=overlapped_mask,
-                box=[dla.x0, dla.x1, dla.y0, dla.y1],
+        if len(self.page_detections) > 0:
+            mask_list, summary_df = self.get_mask_list(
+                by="score", ascending=True, use_rectangular_masks=use_rectangular_masks
             )
 
-            remainder_masks = get_content_cluster_masks_bar_scan(
-                masked_img=masked_img,
-                initial_mask=overlapped_mask,
-                filled_threshold=filled_threshold,
-                bar_width=10,
-                scan_step=5,
-                binary_threshold=200,
-            )
+            if len(mask_list) > 1:
+                overlapped_mask_list = crop_stacks_2(mask_list)
+            else:
+                overlapped_mask_list = mask_list
 
-            if len(remainder_masks) > 0:
-                overlapped_mask = aggregate_masks(remainder_masks)
+            processed_page_detections = []
 
-                new_dla = DLAModelDetection()
+            for i in summary_df.index:
+                dla = self.page_detections[i]
+                overlapped_mask = overlapped_mask_list[i]
 
-                new_dla.initialize_from_mask(
-                    page_id=dla.page_id,
+                masked_img, cropped_img, _, cropped_mask = apply_mask_to_image(
+                    img=self.image,
                     mask=overlapped_mask,
-                    categories=dla.categories,
-                    category=dla.category,
-                    score=dla.score,
+                    box=[dla.x0, dla.x1, dla.y0, dla.y1],
                 )
 
-                new_dla.is_primary = True
+                remainder_masks = get_content_cluster_masks_bar_scan(
+                    masked_img=masked_img,
+                    initial_mask=overlapped_mask,
+                    filled_threshold=filled_threshold,
+                    bar_width=10,
+                    scan_step=5,
+                    binary_threshold=200,
+                )
 
-                processed_page_detections.append(new_dla)
+                if len(remainder_masks) > 0:
+                    overlapped_mask = aggregate_masks(remainder_masks)
 
-            else:
-                dla.is_primary = False
-                processed_page_detections.append(dla)
+                    new_dla = DLAModelDetection()
 
-        self.clear_detections()
+                    new_dla.initialize_from_mask(
+                        page_id=dla.page_id,
+                        mask=overlapped_mask,
+                        categories=dla.categories,
+                        category=dla.category,
+                        score=dla.score,
+                    )
 
-        for dla in processed_page_detections:
-            self.add_to_detections(dla)
+                    new_dla.is_primary = True
 
-        self.complete_setup()
+                    processed_page_detections.append(new_dla)
+
+                else:
+                    dla.is_primary = False
+                    processed_page_detections.append(dla)
+
+            self.clear_detections()
+
+            for dla in processed_page_detections:
+                self.add_to_detections(dla)
+
+            self.complete_setup()
 
     def filter_page_detections_based_score(
         self, score_threshold: float = 0.20, use_rectangular_masks: bool = False
@@ -1202,7 +1311,6 @@ class PDF_Page:
         h_pad: int = 0,
         pad_limit_categories: list = None,
     ):
-
         # Constants
 
         ##############################################################################
@@ -1435,19 +1543,23 @@ class PDF_Page:
         return mask_list, summary_df
 
     def get_aggregate_mask(self, mask_list=None, use_rectangular_masks=False):
+        if mask_list is not None:
+            aggregate_mask = np.zeros(mask_list[0].shape, dtype="uint8")
 
-        if mask_list is None:
-            mask_list, _ = self.get_mask_list(use_rectangular_masks)
+            for mask in mask_list:
+                aggregate_mask = stack_2_arrays(bottom=aggregate_mask, top=mask)
 
-        aggregate_mask = np.zeros(mask_list[0].shape, dtype="uint8")
+        else:
+            aggregate_mask = np.zeros(self.image_shape[0:2], dtype="uint8")
 
-        for mask in mask_list:
-            aggregate_mask = stack_2_arrays(bottom=aggregate_mask, top=mask)
+            if len(self.page_detections) > 0:
+                mask_list, _ = self.get_mask_list(use_rectangular_masks)
+                for mask in mask_list:
+                    aggregate_mask = stack_2_arrays(bottom=aggregate_mask, top=mask)
 
         return aggregate_mask
 
     def apply_all_masks_to_image(self, img, use_rectangular_masks=False):
-
         aggregate_mask = self.get_aggregate_mask(
             use_rectangular_masks=use_rectangular_masks
         )
@@ -1464,3 +1576,15 @@ class PDF_Page:
 
         self.development_images = {}
         self.image = None
+
+    def is_processing_complete(self):
+        if not self.is_initialized:
+            self.__processing_complete = False
+
+        return self.__processing_complete
+
+    def set_processing_complete(self):
+        assert (
+            self.is_initialized
+        ), "ASSERTION Error, 'set_processing_complete': Page must be initialized"
+        self.__processing_complete = True

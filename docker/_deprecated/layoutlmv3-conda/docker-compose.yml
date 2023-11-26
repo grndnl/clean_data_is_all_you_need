@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+
+  layoutlmv3-conda:
+    image: layoutlmv3-conda:latest
+    stdin_open: true
+    tty: true
+    volumes:
+      - /mnt/HDD_1:/user
+    expose:
+      - "8888"
+    ports:
+      - "8888:8888"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

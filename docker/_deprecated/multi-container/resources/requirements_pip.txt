@@ -1,0 +1,10 @@
+# Formatting
+black[jupyter]
+
+# Main
+
+# w281
+scikit-learn
+scikit-image
+imageio
+opencv-python

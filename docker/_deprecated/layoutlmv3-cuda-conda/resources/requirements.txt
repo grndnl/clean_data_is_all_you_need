@@ -1,0 +1,16 @@
+# Formatting
+autopep8
+pylint
+black
+black[jupyter]
+isort
+
+# Main
+jupyter
+numpy
+pandas
+xlsxwriter
+matplotlib
+seaborn
+plotly
+h5py

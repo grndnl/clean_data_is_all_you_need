@@ -1,5 +1,6 @@
 # %% Imports
 
+import json
 import os
 import shutil
 from datetime import datetime
@@ -84,7 +85,6 @@ def display_images_with_titles(images_to_display, titles=None, figsize=(10, 30))
 
     # Loop through the images and display them in subplots
     for i, im in enumerate(images_to_display[0:columns]):
-
         # Add a subplot at the i-th position
         plt.subplot(rows, columns, i + 1)
         plt.imshow(im)
@@ -122,7 +122,6 @@ def convert_non_zero_values(arr, to=1):
 
 
 def get_array_filled_ratio(arr):
-
     return np.count_nonzero(arr) / arr.size
 
 
@@ -211,7 +210,6 @@ def crop_stacks(array_stack_list):
     # Generate
     cropped_arrays = []
     for i, arr in enumerate(array_stack_list):
-
         positions = np.argwhere(agregate_arr == i + 1)
         cropped_array = np.zeros(arr.shape, dtype="uint8")
         cropped_array[positions[:, 0], positions[:, 1]] = 1
@@ -221,7 +219,6 @@ def crop_stacks(array_stack_list):
 
 
 def generate_rectangular_mask(x0, x1, y0, y1, shape):
-
     mask = np.zeros(shape, dtype="uint8")
     pts = np.array([[x0, y0], [x1, y0], [x1, y1], [x0, y1]])
 
@@ -262,7 +259,6 @@ def get_batch(input_list: list, batch_size: int):
 
 # %% Mask Post-Processing Functions
 def get_mask_bounding_box(mask: np.ndarray, box_buffer: int = 0):
-
     assert len(mask.shape) == 2, "Mask must have 2 dimensions"
     assert (
         np.array(mask.shape).min() > 1
@@ -362,7 +358,7 @@ d = [-0.104550, -0.292315, 0.0, 0.292315, 0.104550]
 def extract_edge(im_g, d, p):
     im_x = sepfir2d(im_g, d, p)  # spatial (x) derivative
     im_y = sepfir2d(im_g, p, d)  # spatial (y) derivative
-    return np.sqrt(im_y ** 2 + im_x ** 2)
+    return np.sqrt(im_y**2 + im_x**2)
 
 
 def get_content_cluster_masks_bar_scan(
@@ -582,7 +578,6 @@ def find_mask_parent(target_mask, mask_list):
     return idx_of_max_overlap, mask_overlap
 
 
-
 def find_mask_list_parents(target_mask_list, parent_mask_list):
     assert_mask_properties(parent_mask_list)
     assert_mask_properties(target_mask_list)
@@ -600,7 +595,9 @@ def find_mask_list_parents(target_mask_list, parent_mask_list):
 
         for i, tag in enumerate(offset_tags):
             if tag in unique_values:
-                _, overlap_fraction = get_array_overlap(target_mask, parent_mask_list[i])
+                _, overlap_fraction = get_array_overlap(
+                    target_mask, parent_mask_list[i]
+                )
                 mask_overlap.append(overlap_fraction)
             else:
                 mask_overlap.append(0.0)
@@ -615,3 +612,35 @@ def find_mask_list_parents(target_mask_list, parent_mask_list):
         target_parents.append(idx_of_max_overlap)
 
     return target_parents
+
+
+# %% Model Support Functions
+
+
+def generate_batch_load_json(images_dir, categories_json, output_path):
+    # build images dict
+    images = []
+    for page in list_files_with_extensions(images_dir, ["jpg", "jpeg"]):
+        img = cv2.imread(page)
+        file_name = os.path.basename(page)
+
+        images.append(
+            {
+                "file_name": file_name,
+                "height": img.shape[0],
+                "id": os.path.splitext(file_name)[0],
+                "width": img.shape[1],
+            }
+        )
+
+    # load categories dict
+    with open(categories_json, "r") as json_file:
+        categories = json.load(json_file)
+
+    metadata_dict = {"images": images, "annotations": [], "categories": categories}
+
+    # Save json file
+    with open(output_path, "w") as json_file:
+        json.dump(metadata_dict, json_file)
+
+    return metadata_dict
