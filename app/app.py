@@ -132,7 +132,7 @@ st.title('📄 Clean Data is All You Need')
 with st.sidebar:
     st.header('About')
     # add information about what this page does
-    st.markdown('This is a tool for processing PDFs of scientific papers.')
+    st.markdown('Process PDFs of scientific papers into structured data.')
     st.markdown('[GitHub](https://github.com/grndnl/clean_data_is_all_you_need)')
     st.markdown('*Please do not upload sensitive information.*')
 
