@@ -134,6 +134,7 @@ with st.sidebar:
     # add information about what this page does
     st.markdown('This is a tool for processing PDFs of scientific papers.')
     st.markdown('[GitHub](https://github.com/grndnl/clean_data_is_all_you_need)')
+    st.markdown('*Please do not upload sensitive information.*')
 
 # Tabs
 tab1, tab2 = st.tabs(["Demo", "Documentation"])
@@ -165,6 +166,8 @@ with tab1:
         with col3:
             display_mask(uploaded_files)
         with col4:
+            st.write(" ")
+            st.write(" ")
             display_download_button()
             display_json(uploaded_files)
             display_markdown(uploaded_files)
@@ -179,16 +182,18 @@ with tab1:
             time.sleep(1)
             display_mask(uploaded_files)
 
-            time.sleep(1)
+            time.sleep(0.5)
 
         with col4:
             # zip processed files
             shutil.make_archive('tmp/processed_files', 'zip', 'tmp')
 
+            st.write(" ")
+            st.write(" ")
             display_download_button()
-            time.sleep(1)
+            time.sleep(0.5)
             display_json(uploaded_files)
-            time.sleep(1)
+            time.sleep(0.5)
             display_markdown(uploaded_files)
 
 
