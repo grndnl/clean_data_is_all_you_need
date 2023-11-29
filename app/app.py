@@ -7,6 +7,7 @@ import os
 import base64
 from PIL import Image
 import json
+import requests
 
 
 def process_pdfs(files):
@@ -77,12 +78,12 @@ def display_mask(upload_files):
             st.image(image_file, width=200)  # , caption='Predicted masks for the first page'use_column_width=True)
 
 
-def display_json(upload_files):
+def display_json(upload_files, json_path):
     with st.expander("**JSON Output**"):
         for uploaded_file in upload_files:
             name = uploaded_file.name
             # load json file
-            with open("app/data/json from grobid.json", "r") as f:
+            with open(json_path, "r") as f:
                 json_file = json.load(f)
 
             st.divider()
@@ -90,12 +91,12 @@ def display_json(upload_files):
             st.json(json_file, expanded=False)
 
 
-def display_markdown(upload_files):
+def display_markdown(upload_files, text_path):
     with st.expander("**Txt Output**"):
         for uploaded_file in upload_files:
             name = uploaded_file.name
             # load md file
-            with open("app/data/markdown from html.mmd", "r", encoding="utf8") as f:
+            with open(text_path, "r", encoding="utf8") as f:
                 txt_file = f.read()
 
             st.divider()
@@ -106,6 +107,42 @@ def display_markdown(upload_files):
 def display_download_button():
     with open('tmp/processed_files.zip', 'rb') as f:
         download_btn = st.download_button(label=f'processed_files.zip', file_name=f'processed_files.zip', data=f)
+
+
+def call_process_pdfs_api(uploaded_files):
+    # Prepare the files for sending
+    files = {"files": (file.name, file, "application/pdf") for file in uploaded_files}
+
+    # API endpoint
+    api_url = "http://localhost:8000/process-pdfs/"
+
+    # Make the POST request to the FastAPI backend, and error out with timeout
+    try:
+        response = requests.post(api_url, files=files, timeout=3)
+    except:
+        return None, None
+
+    # Process the response
+    if response.status_code == 200:
+        # The API returns a list of file paths
+        response_data = response.json()
+
+        # Assuming the first element is the path to the JSON file
+        # and the second element is the path to the text file
+        # Process the first file path
+        path_parts_json = response_data[0].split(os.sep)
+        path_parts_json[1] = 'Text_Extraction'
+        json_file_path = os.sep.join(path_parts_json)
+
+        # Process the second file path
+        path_parts_text = response_data[1].split(os.sep)
+        path_parts_text[1] = 'Text_Extraction'
+        text_file_path = os.sep.join(path_parts_text)
+
+        return json_file_path, text_file_path
+    else:
+        # Handle errors or unsuccessful responses
+        return None, None
 
 
 # ------------Page configs-----------------------------------------------------------------------
@@ -135,6 +172,7 @@ with st.sidebar:
     st.markdown('Process PDFs of scientific papers into structured data.')
     st.markdown('[GitHub](https://github.com/grndnl/clean_data_is_all_you_need)')
     st.markdown('*Please do not upload sensitive information.*')
+    st.header(":red[This is a work in progress, and will not work. For a staged demo, please visit [this link](https://cleandataisallyouneed.streamlit.app/).]")
 
 # Tabs
 tab1, tab2 = st.tabs(["Demo", "Documentation"])
@@ -149,7 +187,8 @@ with tab1:
         st.write(" ")
         st.write(" ")
         st.write(" ")
-        process_button = st.button('**Process PDFs**', type='primary', on_click=disable, disabled=st.session_state.disabled)
+        process_button = st.button('**Process PDFs**', type='primary', on_click=disable,
+                                   disabled=st.session_state.disabled)
 
     if st.session_state.processed_files:
         with col3:
@@ -162,27 +201,31 @@ with tab1:
         with col1:
             displayPDF(uploaded_files)
 
-    if st.session_state.processed_files:  # Saved state necessary for clean debugging when deployed locally
-        with col3:
-            display_mask(uploaded_files)
-        with col4:
-            st.write(" ")
-            st.write(" ")
-            display_download_button()
-            display_json(uploaded_files)
-            display_markdown(uploaded_files)
+    # if st.session_state.processed_files:  # Saved state necessary for clean debugging when deployed locally
+    #     with col3:
+    #         display_mask(uploaded_files)
+    #     with col4:
+    #         st.write(" ")
+    #         st.write(" ")
+    #         display_download_button()
+    #         display_json(uploaded_files, json_path)
+    #         display_markdown(uploaded_files, text_path)
 
     if uploaded_files and process_button:
         with col3:
             with st.spinner('Processing PDFs...'):
-                processed_files = process_pdfs(uploaded_files)
-            st.success('Processing complete!')
-            st.session_state.processed_files = True
+                json_path, text_path = call_process_pdfs_api(uploaded_files)
+            if json_path is None or text_path is None:
+                st.error("Something went wrong. Please try again.")
+                st.stop()
+            else:
+                st.success('Processing complete!')
+                st.session_state.processed_files = True
 
             time.sleep(1)
             display_mask(uploaded_files)
 
-            time.sleep(0.5)
+            time.sleep(1)
 
         with col4:
             # zip processed files
@@ -191,11 +234,18 @@ with tab1:
             st.write(" ")
             st.write(" ")
             display_download_button()
-            time.sleep(0.5)
-            display_json(uploaded_files)
-            time.sleep(0.5)
-            display_markdown(uploaded_files)
+            time.sleep(1)
+            display_json(uploaded_files, json_path)
+            time.sleep(1)
+            display_markdown(uploaded_files, text_path)
 
+    # if st.session_state.processed_files:  # Saved state necessary for clean debugging when deployed locally
+    #     with col3:
+    #         display_mask(uploaded_files)
+    #     with col4:
+    #         display_download_button()
+    #         display_json(uploaded_files, json_path)
+    #         display_markdown(uploaded_files, text_path)
 
 # ----------Documentation-----------------------------------------------------------------------------
 with tab2:
