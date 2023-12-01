@@ -1,4 +1,7 @@
 /.idea/
 /tmp/
 __pycache__
-.ipynb_checkpoints
+.ipynb_checkpoints!/app/test_extraction/output/
+/app/text_extraction/output_json_text/
+/app/text_extraction/output/
+/app/text_extraction/pdf_documents/
