@@ -10,6 +10,18 @@ import json
 import requests
 
 
+def convert_docker_path_to_host(docker_path):
+    container_path, host_path = ('/app/src', 'tmp/processed_files')
+    Path(host_path).mkdir(exist_ok=True)
+
+    # Ensure the docker_path starts with the container_path
+    if docker_path.startswith(container_path):
+        # Replace the container_path with the host_path
+        return docker_path.replace(container_path, host_path, 1)
+    else:
+        raise ValueError("Docker path does not match the volume mapping")
+
+
 def process_pdfs(files):
     processed_files = []
 
@@ -56,9 +68,9 @@ def displayPDF(uploaded_files):
         base64_pdf = base64.b64encode(bytes_data).decode('utf-8')
 
         # Embed PDF in HTML
-        pdf_display = F'<iframe src="data:application/pdf;base64,{base64_pdf}" width="40%" height="350" ' \
-                      F'type="application/pdf"></iframe>'
-        # pdf_display = f'<embed src="data:application/pdf;base64,{base64_pdf}" width="40%" height="350" type="application/pdf">'
+        # pdf_display = F'<iframe src="data:application/pdf;base64,{base64_pdf}" width="40%" height="350" ' \
+        #               F'type="application/pdf"></iframe>'
+        pdf_display = f'<embed src="data:application/pdf;base64,{base64_pdf}" width="40%" height="350" type="application/pdf">'
         pdf_displays.append(pdf_display)
 
     # Display file
@@ -131,12 +143,10 @@ def call_process_pdfs_api(uploaded_files):
         # and the second element is the path to the text file
         # Process the first file path
         path_parts_json = response_data[0].split(os.sep)
-        path_parts_json[1] = 'Text_Extraction'
         json_file_path = os.sep.join(path_parts_json)
 
         # Process the second file path
         path_parts_text = response_data[1].split(os.sep)
-        path_parts_text[1] = 'Text_Extraction'
         text_file_path = os.sep.join(path_parts_text)
 
         return json_file_path, text_file_path
@@ -220,6 +230,8 @@ with tab1:
                 st.stop()
             else:
                 st.success('Processing complete!')
+                json_path = convert_docker_path_to_host(json_path)
+                text_path = convert_docker_path_to_host(text_path)
                 st.session_state.processed_files = True
 
             time.sleep(1)
@@ -229,7 +241,8 @@ with tab1:
 
         with col4:
             # zip processed files
-            shutil.make_archive('tmp/processed_files', 'zip', 'tmp')
+            with st.spinner("Zipping processed files..."):
+                shutil.make_archive('tmp/processed_files', 'zip', 'tmp/processed_files/')
 
             st.write(" ")
             st.write(" ")
