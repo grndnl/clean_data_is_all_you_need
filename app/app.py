@@ -11,7 +11,7 @@ import requests
 
 
 def convert_docker_path_to_host(docker_path):
-    container_path, host_path = ('/app/src', 'tmp/processed_files')
+    container_path, host_path = ('/app/src', 'app')
     Path(host_path).mkdir(exist_ok=True)
 
     # Ensure the docker_path starts with the container_path
@@ -170,6 +170,10 @@ if 'processed_files' not in st.session_state:
     st.session_state['processed_files'] = False
 if "disabled" not in st.session_state:
     st.session_state.disabled = False
+if "json_path" not in st.session_state:
+    st.session_state.json_path = None
+if "text_path" not in st.session_state:
+    st.session_state.text_path = None
 
 # ----------UI logic-------------------------------------------------------------------------
 # Title of the page
@@ -233,16 +237,17 @@ with tab1:
                 json_path = convert_docker_path_to_host(json_path)
                 text_path = convert_docker_path_to_host(text_path)
                 st.session_state.processed_files = True
+                st.session_state.json_path = json_path
+                st.session_state.text_path = text_path
 
             time.sleep(1)
             display_mask(uploaded_files)
-
             time.sleep(1)
 
         with col4:
             # zip processed files
             with st.spinner("Zipping processed files..."):
-                shutil.make_archive('tmp/processed_files', 'zip', 'tmp/processed_files/')
+                shutil.make_archive('tmp/processed_files', 'zip', 'app/text_extraction/output_json_text/')
 
             st.write(" ")
             st.write(" ")
@@ -252,13 +257,15 @@ with tab1:
             time.sleep(1)
             display_markdown(uploaded_files, text_path)
 
-    # if st.session_state.processed_files:  # Saved state necessary for clean debugging when deployed locally
-    #     with col3:
-    #         display_mask(uploaded_files)
-    #     with col4:
-    #         display_download_button()
-    #         display_json(uploaded_files, json_path)
-    #         display_markdown(uploaded_files, text_path)
+    elif st.session_state.processed_files:  # Saved state necessary to resume once the download button is pressed
+        with col3:
+            display_mask(uploaded_files)
+        with col4:
+            st.write(" ")
+            st.write(" ")
+            display_download_button()
+            display_json(uploaded_files, st.session_state.json_path)
+            display_markdown(uploaded_files, st.session_state.text_path)
 
 # ----------Documentation-----------------------------------------------------------------------------
 with tab2:
