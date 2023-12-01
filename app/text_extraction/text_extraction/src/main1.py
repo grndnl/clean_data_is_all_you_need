@@ -45,7 +45,7 @@ async def process_pdfs(files: List[UploadFile]):
         pdf_file_path = temp_file_path  # or your specific path
         file_name = upload_file.filename
         file_base = file_name.replace('.pdf', '')
-        Mask_csv_path = '/app/src/Text_Extraction/output/page_masks/'
+        Mask_csv_path = '/app/src/text_extraction/output/page_masks/'
         #Mask_csv_path = os.path.dirname(__file__)
         file_pattern = os.path.join(Mask_csv_path, file_base + '_page_*_mask_mask_summary.csv')
         #print(file_pattern)
@@ -82,7 +82,7 @@ async def process_pdfs(files: List[UploadFile]):
         document_name = os.path.splitext(os.path.basename(pdf_file_path))[0]
         df_sorted = combined_df.sort_values(by=[combined_df.columns[7], combined_df.columns[4]])
 
-        output_dir = '/app/src/Text_Extraction/output_json_text'
+        output_dir = '/app/src/text_extraction/output_json_text'
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
