@@ -32,10 +32,26 @@ def extract_text_from_scaled_pdf(pdf_path, page_number, coords, new_dimensions):
     scaled_doc.close()
     return extracted_text
 
+def extract_page_number(filename):
+    # Split the filename using "_page_" as the separator
+    parts = os.path.basename(filename).split("_page_")
+
+    if len(parts) >= 2:
+        try:
+            # Extract the next part as the page number and convert it to an integer
+            page_number = int(parts[1].split("_")[0])
+            return page_number
+        except ValueError:
+            # Handle the case where the extracted value is not a valid integer
+            return None
+    else:
+        # Handle the case where "_page_" is not found in the filename
+        return None
+
 async def process_pdfs(files: List[UploadFile]):
     for upload_file in files:
         # Temporary storage of the uploaded file
-        temp_file_path = f"temp_{upload_file.filename}"
+        temp_file_path = f"{upload_file.filename}"
         with open(temp_file_path, "wb") as temp_file:
             content = await upload_file.read()
             temp_file.write(content)
@@ -47,7 +63,7 @@ async def process_pdfs(files: List[UploadFile]):
         file_base = file_name.replace('.pdf', '')
         Mask_csv_path = '/app/src/text_extraction/output/page_masks/'
         #Mask_csv_path = os.path.dirname(__file__)
-        file_pattern = os.path.join(Mask_csv_path, file_base + '_page_*_mask_mask_summary.csv')
+        file_pattern = os.path.join(Mask_csv_path, file_base + '_page_*_mask_summary.csv')
         #print(file_pattern)
         #print('working directory',os.getcwd())
         # Use glob to find all files that match the pattern
@@ -70,7 +86,8 @@ async def process_pdfs(files: List[UploadFile]):
             page_number = os.path.basename(file).split('_')[2]
 
             # Add a new column for the page number
-            coordinates_df['page_number'] = int(page_number)
+            coordinates_df['page_number'] = extract_page_number(file)
+            print('page number', extract_page_number(file))
 
             # Concatenate the current DataFrame with the combined DataFrame
             combined_df = pd.concat([combined_df, coordinates_df], ignore_index=True)
@@ -78,7 +95,7 @@ async def process_pdfs(files: List[UploadFile]):
         # Display the combined data
         print(combined_df)
 
-        
+
         document_name = os.path.splitext(os.path.basename(pdf_file_path))[0]
         df_sorted = combined_df.sort_values(by=[combined_df.columns[7], combined_df.columns[4]])
 
@@ -94,7 +111,7 @@ async def process_pdfs(files: List[UploadFile]):
             page_number = int(row['page_number']) - 1
             category = row['category_lbl']
             numbers = row['mask_shape'].strip("()").split(", ")
-            
+
             # Ensure the function extract_text_from_scaled_pdf is defined or imported
             extracted_text = extract_text_from_scaled_pdf(pdf_file_path, page_number, coords, numbers)
 
@@ -120,12 +137,12 @@ async def process_pdfs(files: List[UploadFile]):
             }
             json_structure["paper_text"].append(section_dict)
 
-        json_output = json.dumps(json_structure, indent=4)
-        json_output_file_path = f'{output_dir}/{document_name}_extracted_text.json'
-        with open(json_output_file_path, 'w') as json_file:
-            json_file.write(json_output)
+        #json_output = json.dumps(json_structure, indent=4)
+        json_output_file_path = f'{output_dir}/{document_name}.json'
+        #with open(json_output_file_path, 'w') as json_file:
+        #    json_file.write(json_output)
 
-        output_file_path = f'{output_dir}/{document_name}_extracted_text.txt'
+        output_file_path = f'{output_dir}/{document_name}.txt'
         with open(output_file_path, 'w') as file:
             file.write(concatenated_text)
 
@@ -133,7 +150,7 @@ async def process_pdfs(files: List[UploadFile]):
 
 @app.post("/process-pdfs")
 async def create_upload_files(files: List[UploadFile] = File(...)):
-    return await process_pdfs(files)  
+    return await process_pdfs(files)
 
 
 if __name__ == "__main__":
