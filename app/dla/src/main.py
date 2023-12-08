@@ -3,7 +3,7 @@ import uvicorn
 from datetime import datetime
 import torch
 
-from dla_pipeline_inference import process_documents, available_models
+from dla_pipeline_inference import process_documents, available_models, script_directory
 
 app = FastAPI()
 
@@ -26,6 +26,12 @@ async def get_health():
         return f"CUDA Available ({torch.cuda.get_device_name(0)})"
     else:
         return "CUDA is not available"
+
+
+@app.get("/debug_notes")
+async def debug_notes():
+    notes_dict = {"dla_script_directory": script_directory()}
+    return notes_dict
 
 
 @app.get("/dla")

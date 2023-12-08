@@ -38,6 +38,9 @@ pd.set_option("display.width", 999)
 
 available_models = ["DIT", "LAYOUTLMV3"]
 
+def script_directory():
+    return os.path.dirname(os.path.abspath(sys.argv[0]))
+
 def process_documents(
     full_inference: bool = True,
     continue_from_previous: bool = False,
@@ -71,9 +74,9 @@ def process_documents(
         continue_from_previous = False
 
     # LOAD settings.yaml
-    script_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
+    settings_path = join(script_directory(), "dla_pipeline_settings.yaml")
 
-    with open(join(script_directory, "dla_pipeline_settings.yaml"), "r") as file:
+    with open(settings_path, "r") as file:
         settings = yaml.safe_load(file)
 
     # DIRECTORIES AND CONFIGURATIONS ##############################################
@@ -117,7 +120,7 @@ def process_documents(
         from models.dit.object_detection.dla_pipeline_train_net import run_inference
 
         MODEL_CONFIG = join(
-            script_directory,
+            script_directory(),
             "models/dit/object_detection/publaynet_configs/maskrcnn/maskrcnn_dit_base.yaml",
         )
 
@@ -127,7 +130,7 @@ def process_documents(
         )
 
         MODEL_CONFIG = join(
-            script_directory,
+            script_directory(),
             "models/layoutlmv3/object_detection/cascade_layoutlmv3.yaml",
         )
 
