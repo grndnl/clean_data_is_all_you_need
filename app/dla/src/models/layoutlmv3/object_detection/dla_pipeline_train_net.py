@@ -19,7 +19,7 @@ from typing import Any, Dict, List, Set
 import torch
 from detectron2.checkpoint import DetectionCheckpointer
 from detectron2.config import get_cfg
-from detectron2.data import build_detection_train_loader
+from detectron2.data import build_detection_train_loader, DatasetCatalog
 from detectron2.data.datasets import register_coco_instances
 from detectron2.engine import (
     DefaultTrainer,
@@ -101,15 +101,22 @@ def main(args):
     return trainer.train()
 
 
+def un_register_coco_instances(instance_name):
+    if instance_name in DatasetCatalog.list():
+        DatasetCatalog.remove(instance_name)
+
+
 def inference_main(args, model_input_json, images_dir):
     print(model_input_json)
     print(images_dir)
 
     cfg = setup(args)
 
-    """
-    register publaynet first
-    """
+    # un-register publaynet if its there.
+    un_register_coco_instances("publaynet_train")
+    un_register_coco_instances("publaynet_val")
+
+    # register publaynet
     register_coco_instances(
         "publaynet_train",
         {},
@@ -126,16 +133,16 @@ def inference_main(args, model_input_json, images_dir):
 
     register_coco_instances("publaynet_val", {}, model_input_json, images_dir)
 
-    register_coco_instances(
-        "icdar2019_train",
-        {},
-        cfg.ICDAR_DATA_DIR_TRAIN + ".json",
-        cfg.ICDAR_DATA_DIR_TRAIN,
-    )
+    # register_coco_instances(
+    #     "icdar2019_train",
+    #     {},
+    #     cfg.ICDAR_DATA_DIR_TRAIN + ".json",
+    #     cfg.ICDAR_DATA_DIR_TRAIN,
+    # )
 
-    register_coco_instances(
-        "icdar2019_test", {}, cfg.ICDAR_DATA_DIR_TEST + ".json", cfg.ICDAR_DATA_DIR_TEST
-    )
+    # register_coco_instances(
+    #     "icdar2019_test", {}, cfg.ICDAR_DATA_DIR_TEST + ".json", cfg.ICDAR_DATA_DIR_TEST
+    # )
 
     if args.eval_only:
         model = MyTrainer.build_model(cfg)
