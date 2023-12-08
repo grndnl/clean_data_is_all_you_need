@@ -8,7 +8,8 @@ __pycache__
 /app/data/s2_*
 /app/data/s3_*
 /app/data/s4_*
-/app/model_weights
+/app/model_weights/DiT
+/app/model_weights/LayoutLMV3
 
 /.idea/
 /tmp/
