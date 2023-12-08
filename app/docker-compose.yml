@@ -8,6 +8,8 @@ services:
     tty: true
     volumes:
       - /mnt/HDD_1:/user
+      - /mnt/HDD_1/w210/data:/data
+      - /mnt/HDD_1/w210/model_weights:/model_weights
     expose:
       - "8888"
     ports:
