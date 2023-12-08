@@ -52,6 +52,8 @@ async def get_dla_masks(
             + f"MODEL_TYPE: {model_type}, not recognized"
         )
 
+        return response_dict
+
     response_dict["exit_code"] = process_documents(
         full_inference=True,
         continue_from_previous=False,
