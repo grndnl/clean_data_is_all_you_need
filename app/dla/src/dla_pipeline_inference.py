@@ -38,8 +38,10 @@ pd.set_option("display.width", 999)
 
 available_models = ["DIT", "LAYOUTLMV3"]
 
+
 def script_directory():
     return os.path.dirname(os.path.abspath(sys.argv[0]))
+
 
 def process_documents(
     full_inference: bool = True,
@@ -103,7 +105,12 @@ def process_documents(
     MODEL_CATEGORIES_JSON = join(DATA_DIRECTORY, "categories.json")
 
     # Validate primary requirements
-    for p in [S1_INPUT_PDFS_DIR, S2_DLA_INPUTS_DIR, S3_OUTPUTS_DIR, MODEL_CATEGORIES_JSON]:
+    for p in [
+        S1_INPUT_PDFS_DIR,
+        S2_DLA_INPUTS_DIR,
+        S3_OUTPUTS_DIR,
+        MODEL_CATEGORIES_JSON,
+    ]:
         assert os.path.exists(p), f"DATA PATH NOT FOUND, F{p} does not exist."
 
     # Secondary requirements
@@ -113,7 +120,7 @@ def process_documents(
     # Model modules and settings
     if model_type not in available_models:
         raise Exception(f"MODEL_TYPE: {model_type}, not recognized")
-    
+
     elif model_type == "DIT":
         from models.dit.object_detection.dla_pipeline_train_net import run_inference
 
