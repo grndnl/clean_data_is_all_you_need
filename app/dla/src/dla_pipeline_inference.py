@@ -15,6 +15,8 @@ import numpy as np
 import pandas as pd
 import yaml
 
+from torch.cuda import is_available
+
 
 from dla_pipeline_support_classes import (
     DLAModelDetection,
@@ -205,6 +207,9 @@ def process_documents(
             document_set.add_to_log_dict(
                 f"Inference started with MODEL_TYPE: {model_type}"
             )
+
+            document_set.add_to_log_dict(f"Is GPU AVAILABLE: {is_available()}")
+
             document_set.add_to_log_dict(f"Processing: {len(page_images_list)}: pages")
 
             start = datetime.now()
@@ -271,8 +276,8 @@ def process_documents(
 if __name__ == "__main__":
     # Manual values
     # If no arguments are passed, these values will be used
-    full_inference = "store_true"   
-    continue_last = "store_true" 
+    full_inference = "store_true"
+    continue_last = "store_true"
     model_type = "DIT"
     # model_type = "LAYOUTLMV3"
     ###########################################################################
