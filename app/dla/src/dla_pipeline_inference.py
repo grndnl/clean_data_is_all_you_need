@@ -36,15 +36,15 @@ pd.set_option("display.width", 999)
 
 
 def process_documents(
-    full_processing: bool = False,
-    continue_from_previous: bool = True,
+    full_inference: bool = True,
+    continue_from_previous: bool = False,
     model_type: str = "DIT",
 ):
     """
     Function that runs the DLA pipeline
 
     Options:
-        full_processing:
+        full_inference:
             TRUE: All pdf documents will be fully processed and run through the DLA model
             FALSE: Processing will be based on existing dla model results
 
@@ -61,15 +61,15 @@ def process_documents(
     # INITIAL SETUP ###############################################################
     ###############################################################################
 
-    RESET_DATA_DIRECTORIES = full_processing
-    RUN_MODEL = full_processing
-    if full_processing:
+    RESET_DATA_DIRECTORIES = full_inference
+    RUN_MODEL = full_inference
+    if full_inference:
         continue_from_previous = False
 
     # LOAD settings.yaml
-    script_directory = os.path.dirname(os.path.abspath(sys.argv[0]))  
-    
-    with open(join(script_directory,"dla_pipeline_settings.yaml"), "r") as file:
+    script_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
+
+    with open(join(script_directory, "dla_pipeline_settings.yaml"), "r") as file:
         settings = yaml.safe_load(file)
 
     # DIRECTORIES AND CONFIGURATIONS ##############################################
@@ -109,14 +109,20 @@ def process_documents(
     if model_type == "DIT":
         from models.dit.object_detection.dla_pipeline_train_net import run_inference
 
-        MODEL_CONFIG = join(script_directory, "models/dit/object_detection/publaynet_configs/maskrcnn/maskrcnn_dit_base.yaml")
+        MODEL_CONFIG = join(
+            script_directory,
+            "models/dit/object_detection/publaynet_configs/maskrcnn/maskrcnn_dit_base.yaml",
+        )
 
     elif model_type == "LAYOUTLMV3":
         from models.layoutlmv3.object_detection.dla_pipeline_train_net import (
             run_inference,
         )
 
-        MODEL_CONFIG = join(script_directory, "models/layoutlmv3/object_detection/cascade_layoutlmv3.yaml")
+        MODEL_CONFIG = join(
+            script_directory,
+            "models/layoutlmv3/object_detection/cascade_layoutlmv3.yaml",
+        )
 
     else:
         raise Exception(f"MODEL_TYPE: {model_type}, not recognized")
@@ -126,7 +132,7 @@ def process_documents(
     # FINAL DIRECTORY VALIDATION ##################################################
     ###############################################################################
 
-    if full_processing:
+    if full_inference:
         assert os.path.exists(
             MODEL_WEIGHTS
         ), f"MODEL Weights not found. {MODEL_WEIGHTS}, does not exist"
@@ -137,7 +143,6 @@ def process_documents(
         assert os.path.exists(
             MODEL_OUTPUT_JSON
         ), f"MODEL Results not found, new inference required. {MODEL_OUTPUT_JSON}, does not exist"
-
 
     # LOAD AND SETUP CATEGORIES DICT ##############################################
     ###############################################################################
@@ -247,12 +252,12 @@ def process_documents(
         ## Closeout
         ###############################################
         document_set.add_to_log_dict("Full process completed")
-        exit_code = 0 # 0 for no errors
+        exit_code = 0  # 0 for no errors
 
     except Exception as e:
         document_set.add_to_log_dict("PROCESS ERROR")
         document_set.add_to_log_dict(e)
-        exit_code = 1 # 1 for errors
+        exit_code = 1  # 1 for errors
 
     finally:
         document_set.save_document_list()
@@ -266,8 +271,8 @@ def process_documents(
 if __name__ == "__main__":
     # Manual values
     # If no arguments are passed, these values will be used
-    full_processing = True
-    continue_from_previous = False
+    full_inference = "store_true"   
+    continue_last = "store_true" 
     model_type = "DIT"
     # model_type = "LAYOUTLMV3"
     ###########################################################################
@@ -275,22 +280,20 @@ if __name__ == "__main__":
     # Parse arguments
     parser = argparse.ArgumentParser("Function that runs the DLA pipeline.")
 
-    parser.add_argument("--full_processing", type=bool, default=full_processing)
-    parser.add_argument(
-        "--continue_from_previous", type=bool, default=continue_from_previous
-    )
+    parser.add_argument("--full_inference", action=full_inference)
+    parser.add_argument("--continue_last", action=continue_last)
     parser.add_argument("--model_type", type=str, default=model_type)
 
     args = parser.parse_args()
 
     # Execute code
-    print("\nArguments passed:")
-    print(f" -> {args}")
+    print("\nArguments passed:\n")
+    print(f" -> {args}\n")
     print("*" * 100 + "\n")
 
     exit_code = process_documents(
-        full_processing=args.full_processing,
-        continue_from_previous=args.continue_from_previous,
+        full_inference=args.full_inference,
+        continue_from_previous=args.continue_last,
         model_type=args.model_type,
     )
 

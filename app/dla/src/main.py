@@ -49,7 +49,7 @@ async def get_health():
 @app.get("/dla")
 async def get_dla_masks():
 
-    exit_code  = process_documents(full_processing=True,
+    exit_code  = process_documents(full_inference=True,
                                    continue_from_previous=False, model_type='DIT') 
     
     return exit_code
