@@ -3,6 +3,13 @@ __pycache__
 .ipynb_checkpoints
 .pytest_cache
 
+# DLA Data Directories
+/app/data/s1_*
+/app/data/s2_*
+/app/data/s3_*
+/app/data/s4_*
+/app/model_weights
+
 /.idea/
 /tmp/
 __pycache__
