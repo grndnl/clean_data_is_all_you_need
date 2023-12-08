@@ -271,11 +271,13 @@ def process_documents(
         ###############################################
         document_set.add_to_log_dict("Full process completed")
         exit_code = 0  # 0 for no errors
+        exit_msg = f"SUCCESFULLY PROCESSED {len(document_set.document_list)} documents and {len(document_set.page_images_list)} pages"
 
     except Exception as e:
         document_set.add_to_log_dict("PROCESS ERROR")
         document_set.add_to_log_dict(e)
         exit_code = 1  # 1 for errors
+        exit_msg = f"PROCESS ERROR: {e}. SEE execution_log for details"
 
     finally:
         document_set.save_document_list()
@@ -283,7 +285,7 @@ def process_documents(
         document_set.save_mask_registry()
         document_set.save_log()
 
-        return exit_code
+        return exit_code, exit_msg, S3_OUTPUTS_DIR
 
 
 if __name__ == "__main__":

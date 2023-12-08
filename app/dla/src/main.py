@@ -30,7 +30,10 @@ async def get_health():
 
 @app.get("/debug_notes")
 async def debug_notes():
-    notes_dict = {"dla_script_directory": script_directory()}
+    notes_dict = {
+        "dla_script_directory": script_directory(),
+        "gpu_available": torch.cuda.is_available(),
+    }
     return notes_dict
 
 
@@ -41,20 +44,25 @@ async def get_dla_masks(
     response_dict = {
         "opt_use_cpu": use_cpu,
         "opt_model_type": model_type,
-        "exit_code": 1,
-        "response_msg": "",
+        "output_directory": "",
+        "exit_code": -1,  # no execution
+        "exit_msg": "",
     }
 
     if model_type not in available_models:
         response.status_code = status.HTTP_406_NOT_ACCEPTABLE
-        response_dict["response_msg"] = (
+        response_dict["exit_msg"] = (
             f"Status code {response.status_code} (incorrect entry): "
             + f"MODEL_TYPE: {model_type}, not recognized"
         )
 
         return response_dict
 
-    response_dict["exit_code"] = process_documents(
+    (
+        response_dict["exit_code"],
+        response_dict["exit_msg"],
+        response_dict["output_directory"],
+    ) = process_documents(
         full_inference=True,
         continue_from_previous=False,
         model_type=model_type,
@@ -63,10 +71,6 @@ async def get_dla_masks(
 
     if response_dict["exit_code"] != 0:
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-        response_dict["response_msg"] = (
-            f"Status code {response.status_code} (Processing error): "
-            + "See DLA Log for Details"
-        )
 
     return response_dict
 
