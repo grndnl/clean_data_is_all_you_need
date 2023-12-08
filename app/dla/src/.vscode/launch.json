@@ -14,7 +14,8 @@
             "args": [
                 "--full_inference",
                 // "--continue_last",
-                // "--model_type", "LAYOUTLMV3"
+                // "--model_type", "LAYOUTLMV3",
+                // "--use_cpu"
             ]
         }
     ]

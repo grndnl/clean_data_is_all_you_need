@@ -45,6 +45,7 @@ from .ditod import (
     MyTrainer,
     add_vit_config,
 )
+
 # from dla_pipeline_support_functions import list_files_with_extensions
 
 
@@ -129,8 +130,15 @@ def inference_main(args, model_input_json, images_dir):
     return trainer.train()
 
 
+# DiT Object Detection
 def run_inference(
-    config_file, model_weights, output_dir, model_input_json, images_dir, use_gpu = True, num_gpus=1,
+    config_file,
+    model_weights,
+    output_dir,
+    model_input_json,
+    images_dir,
+    use_cpu=False,
+    num_gpus=1,
 ):
     OPTS = [
         "--config-file",
@@ -144,7 +152,7 @@ def run_inference(
         output_dir,
     ]
 
-    if not torch.cuda.is_available() or not use_gpu:
+    if not torch.cuda.is_available() or use_cpu:
         OPTS.extend(["MODEL.DEVICE", "cpu"])
 
     parser = default_argument_parser()

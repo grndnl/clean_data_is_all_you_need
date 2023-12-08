@@ -41,6 +41,7 @@ def process_documents(
     full_inference: bool = True,
     continue_from_previous: bool = False,
     model_type: str = "DIT",
+    use_cpu: bool = False,
 ):
     """
     Function that runs the DLA pipeline
@@ -208,6 +209,8 @@ def process_documents(
                 f"Inference started with MODEL_TYPE: {model_type}"
             )
 
+            document_set.add_to_log_dict(f"OPTIONS 'use_cpu': {use_cpu}")
+
             document_set.add_to_log_dict(f"Is GPU AVAILABLE: {is_available()}")
 
             document_set.add_to_log_dict(f"Processing: {len(page_images_list)}: pages")
@@ -219,6 +222,7 @@ def process_documents(
                 output_dir=S3_OUTPUTS_DIR,
                 model_input_json=MODEL_INPUT_JSON,
                 images_dir=S2_DLA_INPUTS_DIR,
+                use_cpu=use_cpu,
             )
             duration = datetime.now() - start
 
@@ -280,6 +284,7 @@ if __name__ == "__main__":
     continue_last = "store_true"
     model_type = "DIT"
     # model_type = "LAYOUTLMV3"
+    use_cpu = "store_true"
     ###########################################################################
 
     # Parse arguments
@@ -288,6 +293,7 @@ if __name__ == "__main__":
     parser.add_argument("--full_inference", action=full_inference)
     parser.add_argument("--continue_last", action=continue_last)
     parser.add_argument("--model_type", type=str, default=model_type)
+    parser.add_argument("--use_cpu", action=use_cpu)
 
     args = parser.parse_args()
 
@@ -300,6 +306,7 @@ if __name__ == "__main__":
         full_inference=args.full_inference,
         continue_from_previous=args.continue_last,
         model_type=args.model_type,
+        use_cpu=args.use_cpu,
     )
 
     print(f"EXIT CODE: {exit_code}")

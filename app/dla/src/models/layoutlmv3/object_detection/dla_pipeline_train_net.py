@@ -149,8 +149,16 @@ def inference_main(args, model_input_json, images_dir):
     trainer.resume_or_load(resume=args.resume)
     return trainer.train()
 
+
+# LayoutLMV3 Object Detection
 def run_inference(
-    config_file, model_weights, output_dir, model_input_json, images_dir, num_gpus=1
+    config_file,
+    model_weights,
+    output_dir,
+    model_input_json,
+    images_dir,
+    use_cpu=False,
+    num_gpus=1,
 ):
     OPTS = [
         "--config-file",
@@ -163,6 +171,9 @@ def run_inference(
         "OUTPUT_DIR",
         output_dir,
     ]
+
+    if not torch.cuda.is_available() or use_cpu:
+        OPTS.extend(["MODEL.DEVICE", "cpu"])
 
     parser = default_argument_parser()
     parser.add_argument("--debug", action="store_true", help="enable debug mode")
