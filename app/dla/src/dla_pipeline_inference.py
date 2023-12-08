@@ -103,10 +103,8 @@ def process_documents(
     MODEL_CATEGORIES_JSON = join(DATA_DIRECTORY, "categories.json")
 
     # Validate primary requirements
-    assert os.path.exists(S1_INPUT_PDFS_DIR)
-    assert os.path.exists(S2_DLA_INPUTS_DIR)
-    assert os.path.exists(S3_OUTPUTS_DIR)
-    assert os.path.exists(MODEL_CATEGORIES_JSON)
+    for p in [S1_INPUT_PDFS_DIR, S2_DLA_INPUTS_DIR, S3_OUTPUTS_DIR, MODEL_CATEGORIES_JSON]:
+        assert os.path.exists(p), f"DATA PATH NOT FOUND, F{p} does not exist."
 
     # Secondary requirements
     MODEL_INPUT_JSON = join(S3_OUTPUTS_DIR, "model_input.json")
