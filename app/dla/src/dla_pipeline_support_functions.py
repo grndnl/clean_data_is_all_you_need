@@ -12,14 +12,39 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from scipy.signal import sepfir2d
 
+
 # %% FILE IO Support Functions
+def find_files_recursively(directory):
+    file_list = []
+    dir_list = []
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            file_list.append(os.path.join(root, file))
+
+        for dir in dirs:
+            dir_list.append(os.path.join(root, dir))
+
+    return file_list, dir_list
 
 
 def delete_contents_in_directory(directory_path, verbose=False):
     try:
         # Delete all contents in the directory recursively
-        shutil.rmtree(directory_path)
-        os.makedirs(directory_path)
+        # shutil.rmtree(directory_path)
+        # os.makedirs(directory_path)
+
+        #NOTE: Just using rmtree sometimes produces an error where 
+        # sub-directories cannot be removed if stuff is in them.  
+        # Deleting the files 1st seems to help.
+
+        files, dirs = find_files_recursively(directory_path)
+
+        for f in files:
+            os.remove(f)
+
+        for d in dirs:
+            shutil.rmtree(d)
+
         if verbose:
             print(f'All contents in "{directory_path}" have been deleted successfully.')
     except Exception as e:
@@ -647,6 +672,7 @@ def generate_batch_load_json(images_dir, categories_json, output_path):
 
 
 # %% COCO EDA FUNCTIONS
+
 
 def load_coco_annotations_json(json_path, plot_details=True, plot_title="Data"):
     try:
