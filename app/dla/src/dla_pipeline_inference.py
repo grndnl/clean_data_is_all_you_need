@@ -36,6 +36,7 @@ pd.set_option("display.width", 999)
 # %% FUNCTION #################################################################
 ###############################################################################
 
+available_models = ["DIT", "LAYOUTLMV3"]
 
 def process_documents(
     full_inference: bool = True,
@@ -109,7 +110,10 @@ def process_documents(
     MODEL_OUTPUT_JSON = join(S3_OUTPUTS_DIR, "inference/coco_instances_results.json")
 
     # Model modules and settings
-    if model_type == "DIT":
+    if model_type not in available_models:
+        raise Exception(f"MODEL_TYPE: {model_type}, not recognized")
+    
+    elif model_type == "DIT":
         from models.dit.object_detection.dla_pipeline_train_net import run_inference
 
         MODEL_CONFIG = join(
@@ -126,9 +130,6 @@ def process_documents(
             script_directory,
             "models/layoutlmv3/object_detection/cascade_layoutlmv3.yaml",
         )
-
-    else:
-        raise Exception(f"MODEL_TYPE: {model_type}, not recognized")
 
     MODEL_WEIGHTS = settings["MODEL"][model_type]["MODEL_WEIGHTS"]
 

@@ -3,38 +3,20 @@ import uvicorn
 from datetime import datetime
 import torch
 
-from dla_pipeline_inference import process_documents
+from dla_pipeline_inference import process_documents, available_models
 
 app = FastAPI()
 
+
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
-
-
-@app.get("/hello/")
-async def hello(response: Response, name: str):
-    """Returns a greeting for the name passed in the 'name' parameter"""
-
-    # Handdle empty name case
-    if len(name) == 0:
-        response.status_code = status.HTTP_406_NOT_ACCEPTABLE
-        payload = (
-            f"Status code {response.status_code} (incorrect entry): "
-            + "The 'name' parameter must have a lenth greater than 0"
-        )
-    else:
-        payload = f"Hello {name}!!"
-
-    return payload
+    return {"message": "Clean Data DLA Endpoint"}
 
 
 @app.get("/health")
 async def get_health():
-    return {
-        "CONTAINER":"DLA",
-        "Current-Time": datetime.now().isoformat()
-        }
+    return {"CONTAINER": "DLA", "Current-Time": datetime.now().isoformat()}
+
 
 @app.get("/cuda_check")
 async def get_health():
@@ -43,16 +25,42 @@ async def get_health():
     if is_available:
         return f"CUDA Available ({torch.cuda.get_device_name(0)})"
     else:
-        return "CUDA is not available"   
+        return "CUDA is not available"
 
 
 @app.get("/dla")
-async def get_dla_masks():
+async def get_dla_masks(
+    response: Response, use_cpu: bool = False, model_type: str = "DIT"
+):
+    response_dict = {
+        "opt_use_cpu": use_cpu,
+        "opt_model_type": model_type,
+        "exit_code": 1,
+        "response_msg": "",
+    }
 
-    exit_code  = process_documents(full_inference=True,
-                                   continue_from_previous=False, model_type='DIT') 
-    
-    return exit_code
+    if model_type not in available_models:
+        response.status_code = status.HTTP_406_NOT_ACCEPTABLE
+        response_dict["response_msg"] = (
+            f"Status code {response.status_code} (incorrect entry): "
+            + f"MODEL_TYPE: {model_type}, not recognized"
+        )
+
+    response_dict["exit_code"] = process_documents(
+        full_inference=True,
+        continue_from_previous=False,
+        model_type=model_type,
+        use_cpu=use_cpu,
+    )
+
+    if response_dict["exit_code"] != 0:
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        response_dict["response_msg"] = (
+            f"Status code {response.status_code} (Processing error): "
+            + "See DLA Log for Details"
+        )
+
+    return response_dict
 
 
 if __name__ == "__main__":
