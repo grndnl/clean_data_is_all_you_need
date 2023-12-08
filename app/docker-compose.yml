@@ -45,16 +45,17 @@ services:
               capabilities: [gpu]           
     command: python /app/src/main.py 
 
-  # text_extraction:
-  #   image: clean_text_extraction:latest
-  #   stdin_open: true
-  #   tty: true
-  #   # volumes:
-  #   #   - /mnt/HDD_1:/user
-  #   expose:
-  #     - "8000"
-  #   ports:
-  #     - "8000:8000"              
+  text_extraction:
+    image: clean_text_extraction:latest
+    stdin_open: true
+    tty: true
+    volumes:
+      - /mnt/HDD_1:/user
+      - ./data:/data
+    expose:
+      - "8000"
+    ports:
+      - "8000:8000"              
   #   # command: python /app/src/text_extraction/text_extraction/src/main1.py  
 
 

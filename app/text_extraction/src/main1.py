@@ -8,7 +8,28 @@ from typing import List
 from fastapi import FastAPI, UploadFile, File
 import uvicorn
 
+from os.path import join
+from text_extraction_support_functions import reset_directory
+
 app = FastAPI()
+
+# Data Directories ############################################################
+DATA_DIRECTORY = "/data"
+S1_INPUT_PDFS_DIR = join(DATA_DIRECTORY, "s1_input_pdfs")
+S2_DLA_INPUTS_DIR = join(DATA_DIRECTORY, "s2_dla_inputs")
+S3_OUTPUTS_DIR = join(DATA_DIRECTORY, "s3_outputs")
+S4_JSON_TEXT_OUTPUTS_DIR = join(DATA_DIRECTORY, "s4_json_text_output")
+MASK_CSV_PATH = join(S3_OUTPUTS_DIR, "page_masks")
+
+TMP_DIR = "/pdf_tmp"
+
+reset_directory(S4_JSON_TEXT_OUTPUTS_DIR,erase_contents=True, verbose=True)
+reset_directory(TMP_DIR, erase_contents=True, verbose=True)
+
+for p in [S1_INPUT_PDFS_DIR,S2_DLA_INPUTS_DIR,S3_OUTPUTS_DIR,S4_JSON_TEXT_OUTPUTS_DIR, MASK_CSV_PATH, TMP_DIR]:
+    assert os.path.exists(p), f"Directory {p}, does not exist"
+###############################################################################
+
 
 def extract_text_from_scaled_pdf(pdf_path, page_number, coords, new_dimensions):
     """Extract text from specified coordinates in a scaled PDF."""
@@ -61,7 +82,8 @@ async def process_pdfs(files: List[UploadFile]):
         pdf_file_path = temp_file_path  # or your specific path
         file_name = upload_file.filename
         file_base = file_name.replace('.pdf', '')
-        Mask_csv_path = '/app/src/text_extraction/output/page_masks/'
+        # Mask_csv_path = '/app/src/text_extraction/output/page_masks/'
+        Mask_csv_path = MASK_CSV_PATH
         #Mask_csv_path = os.path.dirname(__file__)
         file_pattern = os.path.join(Mask_csv_path, file_base + '_page_*_mask_summary.csv')
         #print(file_pattern)
@@ -79,15 +101,16 @@ async def process_pdfs(files: List[UploadFile]):
             df = pd.read_csv(file)
 
             # Extract specific columns
-            coordinates_df = df[['x0f', 'x1f', 'y0f', 'y1f','mask_id','mask_shape','category_lbl']].copy()
+            coordinates_df = df[['x0f', 'x1f', 'y0f', 'y1f','mask_id','mask_shape','category_lbl', "page_no"]].copy()
 
             # Extract the page number from the file name
             # Assuming the format is always like '..._page_XXXX_...'
-            page_number = os.path.basename(file).split('_')[2]
+            # page_number = os.path.basename(file).split('_')[2]
 
             # Add a new column for the page number
-            coordinates_df['page_number'] = extract_page_number(file)
-            print('page number', extract_page_number(file))
+            # coordinates_df['page_number'] = extract_page_number(file)
+            coordinates_df['page_number'] = coordinates_df['page_no']
+            # print('page number', extract_page_number(file))
 
             # Concatenate the current DataFrame with the combined DataFrame
             combined_df = pd.concat([combined_df, coordinates_df], ignore_index=True)
@@ -99,7 +122,10 @@ async def process_pdfs(files: List[UploadFile]):
         document_name = os.path.splitext(os.path.basename(pdf_file_path))[0]
         df_sorted = combined_df.sort_values(by=[combined_df.columns[7], combined_df.columns[4]])
 
-        output_dir = '/app/src/text_extraction/output_json_text'
+        # output_dir = '/app/src/text_extraction/output_json_text'
+
+        output_dir = S4_JSON_TEXT_OUTPUTS_DIR
+
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
@@ -108,7 +134,7 @@ async def process_pdfs(files: List[UploadFile]):
 
         for index, row in df_sorted.iterrows():
             coords = (row['x0f'], row['y0f'], row['x1f'], row['y1f'])
-            page_number = int(row['page_number']) - 1
+            page_number = int(row['page_no']) - 1
             category = row['category_lbl']
             numbers = row['mask_shape'].strip("()").split(", ")
 
@@ -137,10 +163,10 @@ async def process_pdfs(files: List[UploadFile]):
             }
             json_structure["paper_text"].append(section_dict)
 
-        #json_output = json.dumps(json_structure, indent=4)
+        json_output = json.dumps(json_structure, indent=4)
         json_output_file_path = f'{output_dir}/{document_name}.json'
-        #with open(json_output_file_path, 'w') as json_file:
-        #    json_file.write(json_output)
+        with open(json_output_file_path, 'w') as json_file:
+           json_file.write(json_output)
 
         output_file_path = f'{output_dir}/{document_name}.txt'
         with open(output_file_path, 'w') as file:
@@ -154,4 +180,4 @@ async def create_upload_files(files: List[UploadFile] = File(...)):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8200)
