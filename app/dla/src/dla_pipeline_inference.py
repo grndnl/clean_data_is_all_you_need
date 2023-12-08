@@ -102,7 +102,7 @@ def process_documents(
     )
 
     # DLA Categories
-    MODEL_CATEGORIES_JSON = join(DATA_DIRECTORY, "categories.json")
+    MODEL_CATEGORIES_JSON = join(DATA_DIRECTORY, "dla_categories.json")
 
     # Validate primary requirements
     for p in [
