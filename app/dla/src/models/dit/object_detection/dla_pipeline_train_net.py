@@ -152,6 +152,9 @@ def run_inference(
         output_dir,
     ]
 
+    #NOTE: If the batch size needs to be edited add "SOLVER.IMS_PER_BATCH" 
+    # to OPTS for example ["SOLVER.IMS_PER_BATCH", "4"]
+
     if not torch.cuda.is_available() or use_cpu:
         OPTS.extend(["MODEL.DEVICE", "cpu"])
 
