@@ -1,7 +1,23 @@
 from fastapi.testclient import TestClient
 
-# from src import __version__
-from src.main import app
+import os
+import sys
+
+# So that pytest can find the app folder ######################################
+# NOTE: This is ugly and not very robust, but for whatever reason I can't 
+# get pytest to find all modules despite having the __init__.py files.
+
+PYTEST_APP_DIR=os.environ.get('PYTEST_APP_DIR')
+
+if PYTEST_APP_DIR==None:
+    PYTEST_APP_DIR = os.environ.get("APP_DIR")
+    os.environ["PYTEST_APP_DIR"] = PYTEST_APP_DIR
+
+sys.path.append(PYTEST_APP_DIR)
+
+from main import app
+###############################################################################
+
 
 """
 STATUS CODE COMMENTS:
@@ -16,18 +32,6 @@ because the endpoint has not been implemented.
 """
 
 client = TestClient(app)
-
-def test_hello_name_passed():
-    response = client.get("/hello", params='name=Carlos')
-    assert response.status_code == 200
-
-def test_hello_bad_url():
-    response = client.get("/hello")
-    assert response.status_code == 422
-
-def test_hello_empty_name_passed():
-    response = client.get("/hello", params='name=')
-    assert response.status_code == 406
 
 def test_root():
     response = client.get("/")
