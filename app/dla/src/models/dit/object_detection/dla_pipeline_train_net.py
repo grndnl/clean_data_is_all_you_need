@@ -23,7 +23,7 @@ import cv2
 import torch
 from detectron2.checkpoint import DetectionCheckpointer
 from detectron2.config import get_cfg
-from detectron2.data import build_detection_train_loader
+from detectron2.data import build_detection_train_loader, DatasetCatalog
 from detectron2.data.datasets import register_coco_instances
 from detectron2.engine import (
     DefaultTrainer,
@@ -97,23 +97,31 @@ def main(args):
     return trainer.train()
 
 
+def un_register_coco_instances(instance_name):
+    if instance_name in DatasetCatalog.list():
+        DatasetCatalog.remove(instance_name)
+
+
 def inference_main(args, model_input_json, images_dir):
     print(model_input_json)
     print(images_dir)
-    """
-    register publaynet first
-    """
+
+    # un-register publaynet if its there.
+    un_register_coco_instances("publaynet_train")
+    un_register_coco_instances("publaynet_val")
+
+    # register publaynet
     register_coco_instances(
         "publaynet_train", {}, "./publaynet_data/train.json", "./publaynet_data/train"
     )
 
     register_coco_instances("publaynet_val", {}, model_input_json, images_dir)
 
-    # Test to see if I can remove
-    register_coco_instances("icdar2019_train", {}, "data/train.json", "data/train")
+    # # Test to see if I can remove
+    # register_coco_instances("icdar2019_train", {}, "data/train.json", "data/train")
 
-    # Test to see if I can remove
-    register_coco_instances("icdar2019_test", {}, "data/test.json", "data/test")
+    # # Test to see if I can remove
+    # register_coco_instances("icdar2019_test", {}, "data/test.json", "data/test")
 
     cfg = setup(args)
 
@@ -152,7 +160,7 @@ def run_inference(
         output_dir,
     ]
 
-    #NOTE: If the batch size needs to be edited add "SOLVER.IMS_PER_BATCH" 
+    # NOTE: If the batch size needs to be edited add "SOLVER.IMS_PER_BATCH"
     # to OPTS for example ["SOLVER.IMS_PER_BATCH", "4"]
 
     if not torch.cuda.is_available() or use_cpu:
