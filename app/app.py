@@ -136,7 +136,6 @@ with st.sidebar:
     # add information about what this page does
     st.markdown('Process PDFs of scientific papers into structured data.')
     st.markdown('[GitHub](https://github.com/grndnl/clean_data_is_all_you_need)')
-    st.markdown('*Please do not upload sensitive information.*')
 
 # Tabs
 tab1, tab2 = st.tabs(["Demo", "Documentation"])
