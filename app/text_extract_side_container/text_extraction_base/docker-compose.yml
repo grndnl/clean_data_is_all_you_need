@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  your_service_name:  # Replace with your actual service name
+    image: text_extract  # Replace with your Docker image name
+    volumes:
+      - C:/Users/grandid/source/repos/clean_data_is_all_you_need/app:/app/src  # Mount host path to container path
+    ports:
+      - "8000:8000"  # Map port 8000 of the container to port 8000 on the host
+    command: python /app/src/text_extraction/text_extraction/src/main1.py  # Command to run inside the container
