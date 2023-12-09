@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "dla-pipeline"
+version = "0.1.0"
+description = ""
+authors = ["Carlos D. Crespo <carlos.d.crespo@berkeley.edu>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

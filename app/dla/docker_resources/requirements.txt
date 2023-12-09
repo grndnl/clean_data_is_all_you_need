@@ -1,0 +1,26 @@
+# Formatting
+autopep8
+pylint
+black
+black[jupyter]
+isort
+click==8.0.4
+
+# Main
+jupyter
+numpy
+pandas
+xlsxwriter
+matplotlib
+seaborn
+plotly
+h5py
+
+# data-sci
+opencv-python
+scikit-image
+
+# PDF
+PyMuPDF
+pdf2image
+PyPDF2
