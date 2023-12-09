@@ -1,3 +1,8 @@
+# Standard python
+__pycache__
+.ipynb_checkpoints
+.pytest_cache
+
 /.idea/
 /tmp/
 __pycache__
