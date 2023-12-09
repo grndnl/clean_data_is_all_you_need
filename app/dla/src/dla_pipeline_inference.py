@@ -29,6 +29,8 @@ from dla_pipeline_support_functions import (
     reset_directory,
 )
 
+from dla_text_extraction import process_pdfs_local
+
 pd.set_option("display.max_rows", 999)
 pd.set_option("display.max_columns", 999)
 pd.set_option("display.width", 999)
@@ -89,6 +91,7 @@ def process_documents(
     S1_INPUT_PDFS_DIR = join(DATA_DIRECTORY, "s1_input_pdfs")
     S2_DLA_INPUTS_DIR = join(DATA_DIRECTORY, "s2_dla_inputs")
     S3_OUTPUTS_DIR = join(DATA_DIRECTORY, "s3_outputs")
+    S4_JSON_TEXT_OUTPUTS_DIR = join(DATA_DIRECTORY, "s4_json_text_output")
 
     reset_directory(
         directory_path=S2_DLA_INPUTS_DIR,
@@ -269,6 +272,14 @@ def process_documents(
 
         ## Closeout
         ###############################################
+        document_set.save_document_list()
+        document_set.save_page_images_list()
+        document_set.save_mask_registry()
+
+        document_set.add_to_log_dict("Extracting Text")
+        process_pdfs_local(DATA_DIRECTORY,single_directory_output=False)
+        document_set.add_to_log_dict("Extracting Text: Complete")
+
         document_set.add_to_log_dict("Full process completed")
         exit_code = 0  # 0 for no errors
         exit_msg = f"SUCCESFULLY PROCESSED {len(document_set.document_list)} documents and {len(document_set.page_images_list)} pages"
@@ -279,13 +290,15 @@ def process_documents(
         exit_code = 1  # 1 for errors
         exit_msg = f"PROCESS ERROR: {e}. SEE execution_log for details"
 
-    finally:
         document_set.save_document_list()
         document_set.save_page_images_list()
         document_set.save_mask_registry()
+
+    finally:
+
         document_set.save_log()
 
-        return exit_code, exit_msg, S3_OUTPUTS_DIR
+        return exit_code, exit_msg, S3_OUTPUTS_DIR, S4_JSON_TEXT_OUTPUTS_DIR
 
 
 if __name__ == "__main__":
