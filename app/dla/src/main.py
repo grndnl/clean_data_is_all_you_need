@@ -45,6 +45,7 @@ async def get_dla_masks(
         "opt_use_cpu": use_cpu,
         "opt_model_type": model_type,
         "output_directory": "",
+        "text_output_directory": "",
         "exit_code": -1,  # no execution
         "exit_msg": "",
     }
@@ -62,6 +63,7 @@ async def get_dla_masks(
         response_dict["exit_code"],
         response_dict["exit_msg"],
         response_dict["output_directory"],
+        response_dict["text_output_directory"],
     ) = process_documents(
         full_inference=True,
         continue_from_previous=False,
