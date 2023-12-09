@@ -1,41 +1,10 @@
 import streamlit as st
-from PyPDF2 import PdfReader
 from pathlib import Path
 import time
 import shutil
-import os
 import base64
 from PIL import Image
 import json
-from io import BytesIO
-
-
-def process_pdfs(files):
-    processed_files = []
-
-    # create tmp folder if it doesn't exist
-    tmp_folder = Path('tmp')
-    tmp_folder.mkdir(exist_ok=True)
-
-    for file in files:
-        file = Path("app/data/" + file)
-        # Read the PDF file from the uploaded file
-        pdf_reader = PdfReader(file)
-
-        # Extract text from the first page
-        first_page = pdf_reader.pages[0]
-        text = first_page.extract_text()
-
-        # Write the text to a text file
-        out_dir = tmp_folder / (file.name[:-4] + '.txt')
-        text_file = out_dir
-        text_file.write_text(text, encoding='utf-8')
-
-        processed_files.append(out_dir)
-
-        # wait 1 second
-        time.sleep(1)
-    return processed_files
 
 
 def disable():
@@ -113,12 +82,6 @@ def display_download_button():
 # ------------Page configs-----------------------------------------------------------------------
 st.set_page_config(layout='wide')
 
-# Clean local files  # TODO
-# clean tmp folder and delete zip file if it exists
-# shutil.rmtree('tmp', ignore_errors=True)
-# os.remove('processed_files.zip') if os.path.exists('processed_files.zip') else None
-
-
 # ------------Session State-----------------------------------------------------------------------
 # st.write(st.session_state)
 if 'processed_files' not in st.session_state:
@@ -154,7 +117,8 @@ with tab1:
         st.write(" ")
         st.write(" ")
         st.write(" ")
-        process_button = st.button('**Process PDFs**', type='primary', on_click=disable, disabled=st.session_state.disabled)
+        process_button = st.button('**Process PDFs**', type='primary', on_click=disable,
+                                   disabled=st.session_state.disabled)
 
     if st.session_state.processed_files:
         with col3:
@@ -180,7 +144,8 @@ with tab1:
     if uploaded_files and process_button:
         with col3:
             with st.spinner('Processing PDFs...'):
-                processed_files = process_pdfs(uploaded_files)
+                # processed_files = process_pdfs(uploaded_files)
+                time.sleep(1)
             st.success('Processing complete!')
             st.session_state.processed_files = True
 
@@ -200,7 +165,6 @@ with tab1:
             display_json(uploaded_files)
             time.sleep(0.5)
             display_markdown(uploaded_files)
-
 
 # ----------Documentation-----------------------------------------------------------------------------
 with tab2:
