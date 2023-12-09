@@ -7,6 +7,7 @@ import os
 import base64
 from PIL import Image
 import json
+from io import BytesIO
 
 
 def process_pdfs(files):
@@ -17,6 +18,7 @@ def process_pdfs(files):
     tmp_folder.mkdir(exist_ok=True)
 
     for file in files:
+        file = Path("app/data/" + file)
         # Read the PDF file from the uploaded file
         pdf_reader = PdfReader(file)
 
@@ -48,11 +50,8 @@ def enable():
 def displayPDF(uploaded_files):
     pdf_displays = []
     for uploaded_file in uploaded_files:
-        # Read file as bytes:
-        bytes_data = uploaded_file.getvalue()
-
-        # Convert to utf-8
-        base64_pdf = base64.b64encode(bytes_data).decode('utf-8')
+        with open("app/data/" + uploaded_file, "rb") as f:
+            base64_pdf = base64.b64encode(f.read()).decode('utf-8')
 
         # Embed PDF in HTML
         pdf_display = F'<iframe src="data:application/pdf;base64,{base64_pdf}" width="40%" height="350" ' \
@@ -68,6 +67,7 @@ def displayPDF(uploaded_files):
 def display_mask(upload_files):
     with st.expander("**Preview identified sections**"):
         for uploaded_file in upload_files:
+            uploaded_file = Path("app/data/" + uploaded_file)
             name = uploaded_file.name
 
             # load image file
@@ -80,9 +80,10 @@ def display_mask(upload_files):
 def display_json(upload_files):
     with st.expander("**JSON Output**"):
         for uploaded_file in upload_files:
+            uploaded_file = Path("app/data/" + uploaded_file)
             name = uploaded_file.name
             # load json file
-            with open("app/data/json from grobid.json", "r") as f:
+            with open("app/data/processed_files/1603.09631.json", "r") as f:
                 json_file = json.load(f)
 
             st.divider()
@@ -93,9 +94,10 @@ def display_json(upload_files):
 def display_markdown(upload_files):
     with st.expander("**Txt Output**"):
         for uploaded_file in upload_files:
+            uploaded_file = Path("app/data/" + uploaded_file)
             name = uploaded_file.name
             # load md file
-            with open("app/data/markdown from html.mmd", "r", encoding="utf8") as f:
+            with open("app/data/processed_files/1603.09631.txt", "r", encoding="utf8") as f:
                 txt_file = f.read()
 
             st.divider()
@@ -104,7 +106,7 @@ def display_markdown(upload_files):
 
 
 def display_download_button():
-    with open('tmp/processed_files.zip', 'rb') as f:
+    with open('app/data/processed_files.zip', 'rb') as f:
         download_btn = st.download_button(label=f'processed_files.zip', file_name=f'processed_files.zip', data=f)
 
 
@@ -144,7 +146,11 @@ with tab1:
     # 4 columns of different sizes
     col1, col2, col3, col4 = st.columns([1, 0.3, 1, 1], gap='large')
     with col1:
-        uploaded_files = st.file_uploader("**Upload PDFs**", accept_multiple_files=True, type='pdf', on_change=enable)
+        # dropdown that allows to select one PDF file
+        uploaded_files = st.selectbox("Select a PDF file", ["1603.09631.pdf"])
+        uploaded_files = [uploaded_files]
+        enable()
+
     with col2:
         st.write(" ")
         st.write(" ")
@@ -186,7 +192,7 @@ with tab1:
 
         with col4:
             # zip processed files
-            shutil.make_archive('tmp/processed_files', 'zip', 'tmp')
+            shutil.make_archive('app/data/processed_files', 'zip', 'app/data/processed_files')
 
             st.write(" ")
             st.write(" ")
