@@ -118,7 +118,6 @@ def extract_text_from_scaled_pdf(pdf_path, page_number, coords, new_dimensions):
 
 
 def process_pdfs_local(data_directory: str, single_directory_output: bool = False):
-
     # Initial File Setup #################################################
 
     S1_INPUT_PDFS_DIR = join(data_directory, "s1_input_pdfs")
@@ -255,7 +254,9 @@ def process_pdfs_local(data_directory: str, single_directory_output: bool = Fals
 
             process_log.append(process_dict)
 
-    return process_log
+            pd.DataFrame(process_log).to_csv(
+                join(S4_JSON_TEXT_OUTPUTS_DIR, "text_extract.csv"), index=False
+            )
 
 
 if __name__ == "__main__":
@@ -263,6 +264,6 @@ if __name__ == "__main__":
 
     assert os.path.exists(data_directory)
 
-    return_dict = process_pdfs_local(data_directory, True)
+    return_dict = process_pdfs_local(data_directory, False)
 
     print(json.dumps(return_dict, indent=4))
