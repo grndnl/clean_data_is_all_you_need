@@ -589,8 +589,11 @@ class PDF_DocumentGroup:
             page.set_processing_complete()
 
             self.save_development_images(page=page)
+
+            #NOTE: Overriding `use_rectangular_masks` to force the final save 
+            # as rectangular due to an issue with the masks having internal voids.
             new_registry = self.save_masks(
-                page=page, use_rectangular_masks=use_rectangular_masks
+                page=page, use_rectangular_masks=True
             )
             self.mask_registry = pd.concat(
                 [self.mask_registry, new_registry], axis=0, ignore_index=True
