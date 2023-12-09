@@ -25,37 +25,37 @@ services:
               count: all
               capabilities: [gpu]
 
-  web_dla:
-    image: clean_dla:latest
-    stdin_open: true
-    tty: true
-    volumes:
-      - ./data:/data
-      - ./model_weights:/model_weights
-    expose:
-      - "8100"
-    ports:
-      - "8100:8100"
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]           
-    command: python /app/src/main.py 
+  # web_dla:
+  #   image: clean_dla:latest
+  #   stdin_open: true
+  #   tty: true
+  #   volumes:
+  #     - ./data:/data
+  #     - ./model_weights:/model_weights
+  #   expose:
+  #     - "8100"
+  #   ports:
+  #     - "8100:8100"
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: all
+  #             capabilities: [gpu]           
+  #   command: python /app/src/main.py 
 
-  text_extraction:
-    image: clean_text_extraction:latest
-    stdin_open: true
-    tty: true
-    volumes:
-      - /mnt/HDD_1:/user
-      - ./data:/data
-    expose:
-      - "8000"
-    ports:
-      - "8000:8000"              
+  # text_extraction:
+  #   image: clean_text_extraction:latest
+  #   stdin_open: true
+  #   tty: true
+  #   volumes:
+  #     - /mnt/HDD_1:/user
+  #     - ./data:/data
+  #   expose:
+  #     - "8000"
+  #   ports:
+  #     - "8000:8000"              
   #   # command: python /app/src/text_extraction/text_extraction/src/main1.py  
 
 
