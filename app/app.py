@@ -1,5 +1,4 @@
 import streamlit as st
-from PyPDF2 import PdfReader
 from pathlib import Path
 import time
 import shutil
@@ -20,33 +19,6 @@ def convert_docker_path_to_host(docker_path):
         return docker_path.replace(container_path, host_path, 1)
     else:
         raise ValueError("Docker path does not match the volume mapping")
-
-
-def process_pdfs(files):
-    processed_files = []
-
-    # create tmp folder if it doesn't exist
-    tmp_folder = Path('tmp')
-    tmp_folder.mkdir(exist_ok=True)
-
-    for file in files:
-        # Read the PDF file from the uploaded file
-        pdf_reader = PdfReader(file)
-
-        # Extract text from the first page
-        first_page = pdf_reader.pages[0]
-        text = first_page.extract_text()
-
-        # Write the text to a text file
-        out_dir = tmp_folder / (file.name[:-4] + '.txt')
-        text_file = out_dir
-        text_file.write_text(text, encoding='utf-8')
-
-        processed_files.append(out_dir)
-
-        # wait 1 second
-        time.sleep(1)
-    return processed_files
 
 
 def disable():
@@ -186,7 +158,7 @@ with st.sidebar:
     st.markdown('Process PDFs of scientific papers into structured data.')
     st.markdown('[GitHub](https://github.com/grndnl/clean_data_is_all_you_need)')
     st.markdown('*Please do not upload sensitive information.*')
-    st.header(":red[This is a work in progress, and will not work. For a staged demo, please visit [this link](https://cleandataisallyouneed.streamlit.app/).]")
+    # st.header(":red[This is a work in progress, and will not work. For a staged demo, please visit [this link](https://cleandataisallyouneed.streamlit.app/).]")
 
 # Tabs
 tab1, tab2 = st.tabs(["Demo", "Documentation"])
