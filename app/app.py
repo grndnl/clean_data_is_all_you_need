@@ -85,9 +85,9 @@ def display_download_button():
 
 
 def run(server_class=HTTPServer, handler_class=SimpleHTTPRequestHandler):
-    server_address = ('', 8081)  # Host and port
+    server_address = ('', 8089)  # Host and port
     httpd = server_class(server_address, handler_class)
-    print("Starting httpd server on port 8081...")
+    print("Starting httpd server on port 8089...")
     httpd.serve_forever()
 
 
