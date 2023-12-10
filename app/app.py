@@ -168,12 +168,152 @@ with tab1:
 
 # ----------Documentation-----------------------------------------------------------------------------
 with tab2:
-    st.markdown("# Overview")
+    st.markdown("# Documentation")
+
+
+# Create tabs
+with st.sidebar:
+    st.title("Documentation Navigation")
+    selected_tab = st.radio("Select a tab:", ["Overview", "Method", "Evaluation"])
+
+# Main content area
+if selected_tab == "Overview":
+    st.markdown("# The Team")
+    st.image("app/data/Team.png", caption="Team", width=800)
+    st.write("This is an overview of the app's purpose and functionality.")
+    st.write("You can add more details and content here.")
+    st.title("User")
+    st.write("Professional needing text extraction on diversity of PDFs for different downstream applications.")
+    st.image("app/data/User_image.png", caption="Intended User", width=800)
+    st.title("Problem")
+    st.write("Parsing unstructured data has traditionally been difficult, time consuming, manually intensive and costly!")
+    st.write("While OCR, parsing, and packages for unstructured data have been improving, there hasn’t been a one click solution to understand a document layout and extract all the components with labels, ready to enrich and pass on to downstream tasks.")
+    
+    st.title("Solution")
+    items = [
+    "Combines two state-of-the-art vision transformer models to segment documents and OCR text and other elements.",
+    "Easy to use.",
+    "Accurate reproduction of data.",
+    "Faster than parsing via OCR/regex.",
+    "The structure can be used in downstream tasks."
+]
+
+    # Display the list as a bulleted list
+    st.markdown("<ul>" + "".join([f"<li>{item}</li>" for item in items]) + "</ul>", unsafe_allow_html=True)
+
+elif selected_tab == "Method":
     st.markdown("# Method")
-    st.markdown("## Document Layout Analysis")
+    st.write("This section provides details about the methods used in the app.")
+    st.image("app/data/Pipeline.png", caption="Application Pipeline", width=1000)
+    
+    #Vision Transformer
+    st.markdown("## Vision Transformer")
+    st.write("Describe Vision Transfor method here.")
+   
+    st.image("app/data/Vision_transformer.png", caption="Vision Transformer Information", width=1000)
+
+    st.markdown("## Document Layout Analysis - Example")
+    st.write("Describe Vision Transfor method here.")    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.image("app/data/PDF_example.png", caption="Application Pipeline", width=700)
+    
+    with col2:
+        st.image("app/data/Pdf_mask.jpg", caption="Application Pipeline", width=700)
+    
+    
+    
+
+    # Document Layout Analysis
+    st.markdown("## Document Layout Analysis - Process Step by Step")
+    st.write("Describe the document layout analysis method here.")
+    st.image("app/data/DLA1.png", caption="Application Pipeline", width=1000)
+    st.image("app/data/DLA2.png", caption="Application Pipeline", width=1000)
+    
+    # Nougat
+    st.markdown("## Nougat - Visual Transformer")
+    st.write("Describe Nougat method here.")
+    st.image("app/data/NOUGAT.png", caption="Application Pipeline", width=700)
+
+    # Method Selector
     st.markdown("## Method Selector")
+    st.write("Explain the method selector feature and its functionality.")
+    
+    # Text Extraction
     st.markdown("## Text Extraction")
+    st.write("Discuss the text extraction method and its capabilities.")
+    
+    # Equation Extraction
     st.markdown("## Equation Extraction")
+    st.write("Explain how the equation extraction feature works.")
+    
+elif selected_tab == "Evaluation":
     st.markdown("# Evaluation")
+    st.write("This section covers the evaluation of the app's performance.")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.image("app/data/TEXT.png", caption="Text", width=500)
+    with col2:
+        st.image("app/data/JSON.png", caption="Json", width=500)
+    st.markdown("## Metrics to evaluate parsers:")
+    st.markdown("- Number of tokens")
+    st.markdown("- Document cosine similarity")
+    st.markdown("- Processing time (pending)")
+
+    st.markdown("## Metrics to evaluate downstream tasks:")
+    st.markdown("- Question/Answer - F1 score")
+
+    # By the Numbers
     st.markdown("## By the Numbers")
+    st.write("Provide numerical metrics and statistics related to the app's performance.")
+    st.image("app/data/Lenght_Tokens_Result.png", caption="Amount of tokens after Text Extracion of different Methods", width=800)
+    st.image("app/data/cosine_similary_Result.png", caption="Results of Cosine Similarity Againts Ground Truth", width=800)
+   
+
+
+
+
+
+    # Center the table using CSS styles
+    st.markdown(
+        """
+        <style>
+        div.stTable {
+            margin: auto;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+)
+    
+
+    st.markdown("# Evaluation with a Downstream Task")
+    st.markdown("## Question Answering on Scientific Research Papers (Qasper)")
+    col1, col2, col3 = st.columns(3)
+    # Create a Streamlit DataFrame from the data
+    
+    with col2:
+        
+        st.image("app/data/qasper.png", caption="Qasper", width=400)
+      
+    with col1:
+    # Add the caption below the centered image
+        
+        st.markdown("Total # papers: 1,585")
+        st.markdown("Total # questions: 5,692")
+        st.markdown("Avg # words:")
+        st.markdown("- Input: 3,629")
+        st.markdown("- Output: 11.4")
+    
+    # Downstream Task
     st.markdown("## Downstream Task")
+    st.write("Explain how the app's results can be used in a downstream task.")
+    # Define the data
+    st.markdown("## Results")
+    data = [
+    {'Dataset': 'Grobid', 'F1 (⇧)': 22.9},
+    {'Dataset': 'Nougat', 'F1 (⇧)': 23.5},
+    {'Dataset': 'Pypdf', 'F1 (⇧)': 22.1},
+    {'Dataset': 'Our method (DLA+Text extraction)', 'F1 (⇧)': 23.4}
+]
+    st.table(data)
