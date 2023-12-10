@@ -190,7 +190,7 @@ def process_pdfs_local(data_directory: str, single_directory_output: bool = Fals
                 processed_lines = [
                     line[:-1] if line.endswith("-") else line for line in lines
                 ]
-                single_line_text = "".join(processed_lines).strip()
+                single_line_text = " ".join(processed_lines).strip()
                 # single_line_text = textwrap.fill(single_line_text, width=80)
 
                 if category == "title":
