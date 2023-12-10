@@ -18,3 +18,4 @@ __pycache__
 /app/text_extraction/output_json_text/
 /app/text_extraction/output/
 /app/text_extraction/pdf_documents/
+/app/data/processed_files.zip

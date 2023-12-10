@@ -30,11 +30,13 @@ def displayPDF(uploaded_files):
         # Embed PDF in HTML
         # pdf_display = F'<iframe src="data:application/pdf;base64,{base64_pdf}" width="40%" height="350" ' \
         #               F'type="application/pdf"></iframe>'
-        pdf_display = f'<embed src="data:application/pdf;base64,{base64_pdf}" width="40%" height="350" type="application/pdf">'
+        pdf_display = f'<embed src="data:application/pdf;base64,{base64_pdf}" width="100%" height="350" type="application/pdf">'
         pdf_displays.append(pdf_display)
 
     # Display file
     with st.expander("**Uploaded PDFs**"):
+        name = uploaded_file.name
+        st.write(f"**{name}**")
         st.markdown(" ".join(pdf_displays), unsafe_allow_html=True)
 
 
@@ -109,6 +111,10 @@ def call_process_pdfs_api():
 def save_files(file_bytes):
     # create folder if it does not exist
     os.makedirs('app/data/s1_input_pdfs', exist_ok=True)
+
+    # delete all content in the folder if there is any
+    for file in os.listdir('app/data/s1_input_pdfs'):
+        os.remove(os.path.join('app/data/s1_input_pdfs', file))
 
     for file_byte in file_bytes:
         with open(f"app/data/s1_input_pdfs/{file_byte.name}", "wb") as f:
@@ -200,7 +206,6 @@ with tab1:
             with st.spinner("Zipping processed files..."):
                 shutil.make_archive('app/data/s4_json_text_output', 'zip', 'app/data/s4_json_text_output')
 
-            st.write(st.session_state.processed_files)
             st.write(" ")
             st.write(" ")
             display_download_button()
