@@ -158,6 +158,10 @@ def process_pdfs_local(data_directory: str, single_directory_output: bool = Fals
 
             doc_mask_registry.sort_values(by=["mask_id", "page_no"], inplace=True)
 
+            # Used for section names
+            doc_cat_dict = {cat:0 for cat in np.unique(doc_mask_registry['category_lbl'].values)}
+
+
             # SETUP OUTPUT DIR
             if single_directory_output:
                 doc_output_dir = S4_JSON_TEXT_OUTPUTS_DIR
@@ -186,7 +190,7 @@ def process_pdfs_local(data_directory: str, single_directory_output: bool = Fals
                 processed_lines = [
                     line[:-1] if line.endswith("-") else line for line in lines
                 ]
-                single_line_text = "".join(processed_lines).strip()
+                single_line_text = " ".join(processed_lines).strip()
                 # single_line_text = textwrap.fill(single_line_text, width=80)
 
                 if category == "title":
@@ -195,15 +199,20 @@ def process_pdfs_local(data_directory: str, single_directory_output: bool = Fals
                 concatenated_text += "\n" + single_line_text
 
                 ## JSON
+                doc_cat_dict[category] += 1
+                section_name = f"{category}_{doc_cat_dict[category]:03}"
+
                 decoded_text = json.dumps(single_line_text, ensure_ascii=False)
 
                 section_dict = {
-                    "section_name": "",  # Set based on your data/logic
-                    "section_text": decoded_text,
-                    "section_annotation": category,
-                    "section_page": page_number + 1,
-                    "section_column": 0,  # Set based on your data/logic
-                    "section_location": [coords],
+                    "section_name": section_name,
+                    # "section_text": decoded_text,
+                    "section_text": single_line_text,
+                    "section_annotation": row["category_lbl"],
+                    "section_page": row["page_no"],
+                    "section_id": row['mask_id'],
+                    "section_column": row['column'],
+                    "section_im_bbox": (row["x0"], row["y0"], row["x1"], row["y1"]),                    
                 }
 
                 json_structure["paper_text"].append(section_dict)
@@ -218,7 +227,8 @@ def process_pdfs_local(data_directory: str, single_directory_output: bool = Fals
                 file.write(concatenated_text)
 
             # Save JSON FILE
-            json_output = json.dumps(json_structure, indent=4)
+            # json_output = json.dumps(json_structure, indent=4)
+            json_output = json.dumps(json_structure, indent=4, ensure_ascii=False)
             json_output_file_path = join(doc_output_dir, pdf_name + ".json")
             with open(json_output_file_path, "w") as json_file:
                 json_file.write(json_output)

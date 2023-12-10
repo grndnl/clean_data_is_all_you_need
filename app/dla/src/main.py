@@ -1,9 +1,10 @@
-from fastapi import FastAPI, Response, status
-import uvicorn
 from datetime import datetime
-import torch
 
-from dla_pipeline_inference import process_documents, available_models, script_directory
+import torch
+import uvicorn
+from fastapi import FastAPI, Response, status
+
+from dla_pipeline_inference import available_models, process_documents, script_directory
 
 app = FastAPI()
 
@@ -39,7 +40,11 @@ async def debug_notes():
 
 @app.get("/dla")
 async def get_dla_masks(
-    response: Response, use_cpu: bool = False, model_type: str = "DIT"
+    response: Response,
+    use_cpu: bool = False,
+    model_type: str = "DIT",
+    full_inference: bool = True,
+    continue_from_previous : bool = False,
 ):
     response_dict = {
         "opt_use_cpu": use_cpu,
@@ -65,14 +70,14 @@ async def get_dla_masks(
         response_dict["output_directory"],
         response_dict["text_output_directory"],
     ) = process_documents(
-        full_inference=True,
-        continue_from_previous=False,
+        full_inference=full_inference,
+        continue_from_previous=continue_from_previous,
         model_type=model_type,
         use_cpu=use_cpu,
     )
 
     if response_dict["exit_code"] != 0:
-        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERRORc
 
     return response_dict
 

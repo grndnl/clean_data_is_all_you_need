@@ -3,6 +3,7 @@
 import json
 import os
 import shutil
+from ast import literal_eval
 from datetime import datetime
 from os.path import join
 
@@ -33,8 +34,8 @@ def delete_contents_in_directory(directory_path, verbose=False):
         # shutil.rmtree(directory_path)
         # os.makedirs(directory_path)
 
-        #NOTE: Just using rmtree sometimes produces an error where 
-        # sub-directories cannot be removed if stuff is in them.  
+        # NOTE: Just using rmtree sometimes produces an error where
+        # sub-directories cannot be removed if stuff is in them.
         # Deleting the files 1st seems to help.
 
         files, dirs = find_files_recursively(directory_path)
@@ -722,3 +723,73 @@ def generate_coco_annotations_df(json_dict, plot_details=True, plot_title="Data"
         plt.show()
 
     return json_dict, df_categories, df_images, df_annotations
+
+
+# %% MASK REGISTRY
+
+
+# Debug, to ensure that the the contents on the individual csvs match the registry one
+def valadiate_results_csvs(page_mask_directory):
+    try:
+        agg_csvs = pd.DataFrame()
+
+        for file in list_files_with_extensions(page_mask_directory, ["csv"]):
+            file_name = get_filename_without_extension(file)
+
+            if file_name == "mask_registry":
+                mask_registry = pd.read_csv(file)
+
+            else:
+                agg_csvs = pd.concat([agg_csvs, pd.read_csv(file)], axis=0)
+
+        agg_csvs.drop("Unnamed: 0", axis=1, inplace=True)
+        mask_registry.drop("Unnamed: 0", axis=1, inplace=True)
+
+        agg_csvs.sort_values(["document", "page_no", "mask_id"], inplace=True)
+        mask_registry.sort_values(["document", "page_no", "mask_id"], inplace=True)
+
+        # Check that they are the same
+        assert len(mask_registry) == len(
+            agg_csvs
+        ), "The aggregated content of all the individual page csvs and the mask_registry, do not have the same length"
+        assert np.array_equal(
+            agg_csvs, mask_registry
+        ), "The aggregated content of all the individual page csvs and the mask_registry, do not match"
+
+    except Exception as e:
+        raise Exception(f"Match error: {e}")
+
+
+def load_mask_registry(page_mask_directory, validate_csvs=False):
+    valadiate_results_csvs(page_mask_directory)
+    mask_registry = pd.read_csv(join(page_mask_directory, "mask_registry.csv"))
+
+    mask_registry.sort_values(["document", "page_no", "mask_id"], inplace=True)
+
+    mask_registry = mask_registry[
+        [
+            "document",
+            "page_no",
+            "mask_id",
+            "category",
+            "category_lbl",
+            "score",
+            "x0",
+            "x1",
+            "y0",
+            "y1",
+            "xcf",
+            "ycf",
+            "column",
+            "mask_shape",
+            "is_primary",
+            "mask_img_file_names",
+            "mask_file_names",
+        ]
+    ]
+
+    mask_registry["mask_shape"] = mask_registry["mask_shape"].apply(
+        lambda var: literal_eval(var)
+    )
+
+    return mask_registry
