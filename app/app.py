@@ -27,8 +27,7 @@ def displayPDF(uploaded_files):
             base64_pdf = base64.b64encode(f.read()).decode('utf-8')
 
         # Embed PDF in HTML
-        st.write(f"http://localhost:8080/data/{uploaded_file}")
-        pdf_display = F'<iframe src="http://localhost:8080/app/data/{uploaded_file}" width="100%" height="350" ' \
+        pdf_display = F'<iframe src="http://localhost:8725/app/data/{uploaded_file}" width="100%" height="350" ' \
                       F'type="application/pdf"></iframe>'
         pdf_displays.append(pdf_display)
 
@@ -85,9 +84,9 @@ def display_download_button():
 
 
 def run(server_class=HTTPServer, handler_class=SimpleHTTPRequestHandler):
-    server_address = ('', 8089)  # Host and port
+    server_address = ('', 8725)  # Host and port
     httpd = server_class(server_address, handler_class)
-    print("Starting httpd server on port 8089...")
+    print("Starting httpd server on port 8725...")
     httpd.serve_forever()
 
 
