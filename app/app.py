@@ -292,11 +292,11 @@ elif selected_tab == "Evaluation":
     col1, col2, col3 = st.columns(3)
     # Create a Streamlit DataFrame from the data
     
-    with col2:
+    with col1:
         
         st.image("app/data/Qasper.png", caption="Qasper", width=400)
       
-    with col1:
+    with col2:
     # Add the caption below the centered image
         
         st.markdown("Total # papers: 1,585")
