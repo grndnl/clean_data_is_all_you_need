@@ -5,9 +5,10 @@ import shutil
 import base64
 from PIL import Image
 import json
-from pdf_server import run
 import asyncio
 import threading
+from http.server import HTTPServer, SimpleHTTPRequestHandler
+
 
 
 def disable():
@@ -81,6 +82,13 @@ def display_markdown(upload_files):
 def display_download_button():
     with open('app/data/processed_files.zip', 'rb') as f:
         download_btn = st.download_button(label=f'processed_files.zip', file_name=f'processed_files.zip', data=f)
+
+
+def run(server_class=HTTPServer, handler_class=SimpleHTTPRequestHandler):
+    server_address = ('', 8080)  # Host and port
+    httpd = server_class(server_address, handler_class)
+    print("Starting httpd server on port 8080...")
+    httpd.serve_forever()
 
 
 async def start_http_server():
