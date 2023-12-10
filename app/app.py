@@ -294,7 +294,7 @@ elif selected_tab == "Evaluation":
     
     with col2:
         
-        st.image("app/data/Qasper.png", caption="Qasper", width=400)
+        st.image("app/data/Qgit asper.png", caption="Qasper", width=400)
       
     with col1:
     # Add the caption below the centered image
@@ -310,10 +310,11 @@ elif selected_tab == "Evaluation":
     st.write("Explain how the app's results can be used in a downstream task.")
     # Define the data
     st.markdown("## Results")
-    data = [
+    with col1:
+        data = [
     {'Dataset': 'Grobid', 'F1 (⇧)': 22.9},
     {'Dataset': 'Nougat', 'F1 (⇧)': 23.5},
     {'Dataset': 'Pypdf', 'F1 (⇧)': 22.1},
     {'Dataset': 'Our method (DLA+Text extraction)', 'F1 (⇧)': 23.4}
-]
+    ]
     st.table(data)
