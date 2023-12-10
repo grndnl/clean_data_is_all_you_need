@@ -294,7 +294,7 @@ elif selected_tab == "Evaluation":
     
     with col2:
         
-        st.image("app/data/qasper.png", caption="Qasper", width=400)
+        st.image("app/data/Qasper.png", caption="Qasper", width=400)
       
     with col1:
     # Add the caption below the centered image
