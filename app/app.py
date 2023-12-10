@@ -5,6 +5,9 @@ import shutil
 import base64
 from PIL import Image
 import json
+from pdf_server import run
+import asyncio
+import threading
 
 
 def disable():
@@ -23,13 +26,14 @@ def displayPDF(uploaded_files):
             base64_pdf = base64.b64encode(f.read()).decode('utf-8')
 
         # Embed PDF in HTML
-        pdf_display = F'<iframe src="data:application/pdf;base64,{base64_pdf}" width="40%" height="350" ' \
+        st.write(f"http://localhost:8080/data/{uploaded_file}")
+        pdf_display = F'<iframe src="http://localhost:8080/app/data/{uploaded_file}" width="100%" height="350" ' \
                       F'type="application/pdf"></iframe>'
-        # pdf_display = f'<embed src="data:application/pdf;base64,{base64_pdf}" width="40%" height="350" type="application/pdf">'
         pdf_displays.append(pdf_display)
 
     # Display file
     with st.expander("**Uploaded PDFs**"):
+        st.markdown(f"**{uploaded_file}**")
         st.markdown(" ".join(pdf_displays), unsafe_allow_html=True)
 
 
@@ -79,8 +83,17 @@ def display_download_button():
         download_btn = st.download_button(label=f'processed_files.zip', file_name=f'processed_files.zip', data=f)
 
 
+async def start_http_server():
+    # Run the HTTP server in a separate thread
+    server_thread = threading.Thread(target=run, daemon=True)
+    server_thread.start()
+
 # ------------Page configs-----------------------------------------------------------------------
 st.set_page_config(layout='wide')
+
+# run pdf server
+asyncio.run(start_http_server())
+
 
 # ------------Session State-----------------------------------------------------------------------
 # st.write(st.session_state)
