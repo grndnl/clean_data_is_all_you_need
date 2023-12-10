@@ -1,13 +1,14 @@
 import streamlit as st
+import fitz
 from pathlib import Path
 import time
 import shutil
 import base64
 from PIL import Image
 import json
-import asyncio
-import threading
-from http.server import HTTPServer, SimpleHTTPRequestHandler
+# import asyncio
+# import threading
+# from http.server import HTTPServer, SimpleHTTPRequestHandler
 
 
 
@@ -22,19 +23,15 @@ def enable():
 
 def displayPDF(uploaded_files):
     pdf_displays = []
-    for uploaded_file in uploaded_files:
-        with open("app/data/" + uploaded_file, "rb") as f:
-            base64_pdf = base64.b64encode(f.read()).decode('utf-8')
-
-        # Embed PDF in HTML
-        pdf_display = F'<iframe src="http://localhost:8725/app/data/{uploaded_file}" width="100%" height="350" ' \
-                      F'type="application/pdf"></iframe>'
-        pdf_displays.append(pdf_display)
+    document = fitz.open("app/data/" + uploaded_files[0])
+    page = document.load_page(0)  # number of page
+    pix = page.get_pixmap()
+    pix.save("image.png")
 
     # Display file
     with st.expander("**Uploaded PDFs**"):
-        st.markdown(f"**{uploaded_file}**")
-        st.markdown(" ".join(pdf_displays), unsafe_allow_html=True)
+        st.markdown(f"**{uploaded_files}**")
+        st.image("image.png", width=200)
 
 
 def display_mask(upload_files):
@@ -83,23 +80,8 @@ def display_download_button():
         download_btn = st.download_button(label=f'processed_files.zip', file_name=f'processed_files.zip', data=f)
 
 
-def run(server_class=HTTPServer, handler_class=SimpleHTTPRequestHandler):
-    server_address = ('', 8725)  # Host and port
-    httpd = server_class(server_address, handler_class)
-    print("Starting httpd server on port 8725...")
-    httpd.serve_forever()
-
-
-async def start_http_server():
-    # Run the HTTP server in a separate thread
-    server_thread = threading.Thread(target=run, daemon=True)
-    server_thread.start()
-
 # ------------Page configs-----------------------------------------------------------------------
 st.set_page_config(layout='wide')
-
-# run pdf server
-asyncio.run(start_http_server())
 
 
 # ------------Session State-----------------------------------------------------------------------
