@@ -24,3 +24,7 @@ scikit-image
 PyMuPDF
 pdf2image
 PyPDF2
+
+# Other 
+pytesseract
+pycocotools

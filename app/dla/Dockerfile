@@ -89,6 +89,10 @@ RUN pip install -r requirements_web_api.txt
 # ## Later Additions
 # #######################################
 
+RUN apt-get update &&\
+    apt-get install -y tesseract-ocr &&\
+    rm -rf /var/lib/apt/lists/*
+
 WORKDIR ${APP_DIR}
 
 COPY . ./
