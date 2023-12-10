@@ -206,7 +206,8 @@ def process_pdfs_local(data_directory: str, single_directory_output: bool = Fals
 
                 section_dict = {
                     "section_name": section_name,
-                    "section_text": decoded_text,
+                    # "section_text": decoded_text,
+                    "section_text": single_line_text,
                     "section_annotation": row["category_lbl"],
                     "section_page": row["page_no"],
                     "section_id": row['mask_id'],
@@ -226,7 +227,8 @@ def process_pdfs_local(data_directory: str, single_directory_output: bool = Fals
                 file.write(concatenated_text)
 
             # Save JSON FILE
-            json_output = json.dumps(json_structure, indent=4)
+            # json_output = json.dumps(json_structure, indent=4)
+            json_output = json.dumps(json_structure, indent=4, ensure_ascii=False)
             json_output_file_path = join(doc_output_dir, pdf_name + ".json")
             with open(json_output_file_path, "w") as json_file:
                 json_file.write(json_output)
