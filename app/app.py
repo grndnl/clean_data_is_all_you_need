@@ -312,9 +312,9 @@ elif selected_tab == "Evaluation":
     st.markdown("## Results")
     with col1:
         data = [
-    {'Dataset': 'Grobid', 'F1 (⇧)': 22.9},
-    {'Dataset': 'Nougat', 'F1 (⇧)': 23.5},
-    {'Dataset': 'Pypdf', 'F1 (⇧)': 22.1},
-    {'Dataset': 'Our method (DLA+Text extraction)', 'F1 (⇧)': 23.4}
-    ]
-    st.table(data)
+        {'Dataset': 'Grobid', 'F1 (⇧)': 22.9},
+        {'Dataset': 'Nougat', 'F1 (⇧)': 23.5},
+        {'Dataset': 'Pypdf', 'F1 (⇧)': 22.1},
+        {'Dataset': 'Our method (DLA+Text extraction)', 'F1 (⇧)': 23.4}
+        ]
+        st.table(data)
