@@ -272,13 +272,13 @@ with tab2:
         st.image("app/data/Lenght_Tokens_Result.png", caption="Amount of tokens after Text Extracion of different Methods", width=800)
         st.image("app/data/cosine_similary_Result.png", caption="Results of Cosine Similarity Againts Ground Truth", width=800)
         with col1:
-        data = [
+            data = [
             {'Dataset': 'Grobid', 'Processing Time per page': 'Less than 1 second'},
             {'Dataset': 'Nougat', 'Processing Time per page': '4.93 seconds'},
             {'Dataset': 'Pypdf', 'Processing Time per page': 'Less than 1 second'},
             {'Dataset': 'Our method (DLA+Text extraction)', 'Processing Time per page': '4.47 seconds'}
             ]
-        st.table(data)
+            st.table(data)
 
 
 
