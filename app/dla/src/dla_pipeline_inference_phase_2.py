@@ -467,13 +467,55 @@ def process_documents_phase_2(
                     LOG_LIST, f"Processing {document_id}_page{page_no:04}: FAILED"
                 )
 
+        
+        if save_results:
+            add_to_log_dict(LOG_LIST, "Saving mask registry")
+            output_path = join(PAGE_MASK_DIR, "mask_registry_phase_2.csv")
+            mask_registry.to_csv(output_path, index=False)
+
+            category_count_dict = {}
+            for i, row in doc_text_registry.iterrows():
+                json_fp = join(row['output_directory'], row['json_path'])
+
+                with open(json_fp, "r") as json_file:
+                    doc_json = json.load(json_file)
+                    document_id = doc_json['paper_id']
+
+                    for ii in range(len(doc_json['paper_text'])):
+                        section = doc_json['paper_text'][ii]
+                        page_no = section['section_page']
+                        mask_id = section['section_id']
+
+                        r = mask_registry.query(f"document=='{document_id}' & page_no=={page_no} & mask_id=={mask_id}")
+
+                        new_category = r.iloc[0,:]['new_category_lbl']
+
+                        if new_category not in category_count_dict.keys():
+                            category_count_dict[new_category] = 1
+                        
+                        new_section_name = f"{new_category}_{category_count_dict[new_category]:03}"
+
+
+                        doc_json['paper_text'][ii]['section_annotation'] = new_category
+                        doc_json['paper_text'][ii]['section_name'] = new_section_name
+
+                        category_count_dict[new_category] += 1
+                
+                
+                json_output = json.dumps(doc_json, indent=4, ensure_ascii=False)
+                json_fp_new = json_fp.replace(".json", "_Phase_2.json")
+                with open(json_fp_new, "w") as json_file:
+                    json_file.write(json_output)
+
+
+
+
+                
+
+
         exit_code = 0
         log_message = f"DLA Phase 2: SUCCESSFULLY PROCESSED {i+1} pages"
         add_to_log_dict(LOG_LIST, log_message)
-
-        if save_results:
-            output_path = join(PAGE_MASK_DIR, "mask_registry_phase_2.csv")
-            mask_registry.to_csv(output_path, index=False)
 
     except Exception as e:
         exit_code = 1
