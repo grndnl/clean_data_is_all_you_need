@@ -30,8 +30,8 @@ def displayPDF(uploaded_files):
 
     # Display file
     with st.expander("**Uploaded PDFs**"):
-        st.markdown(f"**{uploaded_files}**")
-        st.image("image.png", width=200)
+        st.markdown(f"**{uploaded_files[0]}**")
+        st.image("image.png", width=300)
 
 
 def display_mask(upload_files):
@@ -41,10 +41,10 @@ def display_mask(upload_files):
             name = uploaded_file.name
 
             # load image file
-            image_file = Image.open("app/data/1603.09631_page_0001_dev_img_1_base_dla_result.jpg")
+            image_file = Image.open("app/data/1603.09631_page_0001_dev_img_1_base_dla_result.jpg") # TODO This is actually the wrong image
 
             st.markdown(f"**{name}**")
-            st.image(image_file, width=200)  # , caption='Predicted masks for the first page'use_column_width=True)
+            st.image(image_file, width=300)  # , caption='Predicted masks for the first page'use_column_width=True)
 
 
 def display_json(upload_files):
@@ -170,16 +170,11 @@ with tab1:
 
 # ----------Documentation-----------------------------------------------------------------------------
 with tab2:
-    st.markdown("# Documentation")
+    selected_tab = st.radio("", ["**Overview**", "**Method**", "**Evaluation**"], horizontal=True)
 
-
-    # Create tabs
-    with st.sidebar:
-        st.title("Documentation Navigation")
-        selected_tab = st.radio("Select a tab:", ["Overview", "Method", "Evaluation"])
     
     # Main content area
-    if selected_tab == "Overview":
+    if selected_tab == "**Overview**":
         st.markdown("# The Team")
         st.image("app/data/Team.png", caption="Team", width=800)
         st.write("This is an overview of the app's purpose and functionality.")
@@ -203,7 +198,7 @@ with tab2:
         # Display the list as a bulleted list
         st.markdown("<ul>" + "".join([f"<li>{item}</li>" for item in items]) + "</ul>", unsafe_allow_html=True)
     
-    elif selected_tab == "Method":
+    elif selected_tab == "**Method**":
         st.markdown("# Method")
         st.write("This section provides details about the methods used in the app.")
         st.image("app/data/Pipeline.png", caption="Application Pipeline", width=1000)
@@ -249,7 +244,7 @@ with tab2:
         st.markdown("## Equation Extraction")
         st.write("Explain how the equation extraction feature works.")
         
-    elif selected_tab == "Evaluation":
+    elif selected_tab == "**Evaluation**":
         st.markdown("# Evaluation")
         st.write("This section covers the evaluation of the app's performance.")
         col1, col2 = st.columns(2)
