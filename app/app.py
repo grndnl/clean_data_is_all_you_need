@@ -265,8 +265,37 @@ with tab2:
 
     elif selected_tab == "**Method**":
         st.markdown("# Method")
-        st.write("This section provides details about the methods used in the app.")
+        # Title
+        st.title("Document Processing Workflow Summary")
+
+        # Introduction
+        st.write("In our document processing workflow, we follow a series of steps to efficiently handle different types of documents.")
+                
         st.image("app/data/Pipeline.png", caption="Application Pipeline", width=1000)
+        
+        # Step 1: Import and Convert
+        st.write("## Import and Convert")
+        st.write("We start by importing documents and converting them into images.")
+
+            # Branching Decision
+        st.write("Next, we make decisions based on the document's content and text extractability.")
+
+            # Upper Branch
+        st.write("## Upper Branch:")
+        st.write("If the document contains extractable text, we utilize the Document Layout Analysis (DLA) model. ")
+        st.write("The DLA model helps recognize regions, capture figures and tables as images, and directly extract text.")
+        st.write("This upper branch provides detailed tags for each region, facilitating filtering and augmentation for downstream tasks.")
+
+            # Lower Branch
+        st.write("## Lower Branch:")
+        st.write("If the document lacks extractable text, we opt for the lower branch.")
+        st.write("In this case, we employ the Nougat OCR model to process the data.")
+        st.write("The lower branch can handle documents without extractable text and can natively convert formulas and tables to LaTeX.")
+        st.write("However, it does not offer detailed section tagging.")
+
+        # Conclusion
+        st.write("Our document processing workflow is designed to efficiently handle a variety of documents, providing flexibility and accuracy in data extraction.")
+        
         
         
         # Technical Architecture Overview
@@ -281,8 +310,56 @@ with tab2:
        
         st.image("app/data/Vision_transformer.png", caption="Vision Transformer Information", width=700)
     
-        st.markdown("## Document Layout Analysis - Example")
-        st.write("Describe Vision Transfor method here.")    
+                 
+       
+        
+    
+        # Document Layout Analysis
+        st.markdown("## Document Layout Analysis - Process Step by Step")
+                
+        # Introduction
+        st.write("In this section, we will delve into the Document Layout Analysis (DLA) component of our data extraction process. DLA plays a crucial role in understanding the structure and organization of documents, enabling us to extract valuable information effectively.")
+        st.image("app/data/DLA1.png", caption="Application Pipeline", width=1000)
+        st.image("app/data/DLA2.png", caption="Application Pipeline", width=1000)
+        # Page-by-Page Import
+        st.markdown("## Page-by-Page Import:")
+        st.write("- Documents are imported into our system on a page-by-page basis.")
+        st.write("- Each page is treated as an individual unit for analysis.")
+
+        # Vision Transformer Utilization
+        st.markdown("## Vision Transformer Utilization:")
+        st.write("- We employ a powerful vision transformer model to recognize entities within each page.")
+        st.write("- Unlike traditional OCR techniques, which process text sequentially, our vision transformer can process images as sequences of pixels or patches.")
+        st.write("- This enables us to understand visual data spatially and capture complex relationships within images.")
+
+        # Output: Bounding Boxes and Classification
+        st.markdown("## Output: Bounding Boxes and Classification:")
+        st.write("- After analysis, the DLA model generates a set of bounding boxes.")
+        st.write("- Each bounding box is associated with a classification and a probability score.")
+        st.write("- These bounding boxes represent regions of interest within the document.")
+
+        # Addressing Overlaps
+        st.markdown("## Addressing Overlaps:")
+        st.write("- It's common to encounter multiple bounding boxes that overlap in the same region.")
+        st.write("- To resolve this, we apply heuristic logic in the third step.")
+        st.write("- The logic identifies regions with the highest probability and eliminates overlap from other boxes.")
+        st.write("- This ensures that each region is uniquely claimed by only one bounding box.")
+
+        # SVM Classifier for Unclassified Regions
+        st.markdown("## SVM Classifier for Unclassified Regions:")
+        st.write("- In some cases, certain regions may remain unclassified during the initial inference step.")
+        st.write("- These unclassified regions often correspond to elements for which the model lacks training data.")
+        st.write("- To address this, we employ a Support Vector Machine (SVM) classifier.")
+
+        #Indexing for Structure
+        st.markdown("## Indexing for Structure:")
+        st.write("- Finally, all the bounding boxes are consolidated.")
+        st.write("- They are organized based on their vertical order and column location, effectively structuring the document's content.")
+        st.write("This document layout analysis is a critical step in our data extraction process. It empowers us to understand the document's structure and content, enabling accurate and meaningful data extraction for various downstream applications.")
+        
+
+
+        st.write("## An example with more lovel of detail")    
         col1, col2 = st.columns(2)
         with col1:
             st.image("app/data/PDF_example.png", caption="Application Pipeline", width=700)
@@ -291,16 +368,6 @@ with tab2:
             st.image("app/data/Pdf_mask.jpg", caption="Application Pipeline", width=700)
         
         
-        
-    
-        # Document Layout Analysis
-        st.markdown("## Document Layout Analysis - Process Step by Step")
-        st.write("Describe the document layout analysis method here.")
-        st.image("app/data/DLA1.png", caption="Application Pipeline", width=1000)
-        st.image("app/data/DLA2.png", caption="Application Pipeline", width=1000)
-        
-        # Nougat
-        st.markdown("## Nougat - Visual Transformer")
         # Neural Optical Understanding for Academic Documents (Nougat)
         st.markdown("## Neural Optical Understanding for Academic Documents (Nougat)")
 
@@ -311,41 +378,35 @@ with tab2:
         st.write("Thanks to its Transformer-based architecture, Nougat offers highly parallelizable and cost-effective processing while maintaining exceptional accuracy. However, for our project, the output format wasn't the semi-structured JSON we aimed for. Achieving this required a prior understanding of the document's layout, followed by fine-tuning Nougat to interpret the data accordingly. We are actively working on implementing these enhancements for our final presentation. Now, for more insights into document layout, let's turn to Carlos.")
 
         st.image("app/data/NOUGAT.png", caption="Application Pipeline", width=700)
-    
-        # Method Selector
-        st.markdown("## Method Selector")
-        st.write("Explain the method selector feature and its functionality.")
-        
-        # Text Extraction
-        st.markdown("## Text Extraction")
-        st.write("Discuss the text extraction method and its capabilities.")
-        
-        # Equation Extraction
-        st.markdown("## Formula Extraction")
-        st.write("Explain how the equation extraction feature works.")
-        st.image("app/data/DLAwithformula.png", caption="DLA mask visual results", width=700)
-
-    elif selected_tab == "**Evaluation**":
-        st.markdown("# Evaluation")
-        st.write("This section covers the evaluation of the app's performance.")
+        # Text and Json Extraction
+        st.markdown("## Text and Json Extraction")
+        st.write("Once we get the DLA outputs, we obtained and indexed dataset of masks, classification and positions. These are use to create text files and json files. We utilize PyMUPDF to extract the information and structured as the example below")
         col1, col2 = st.columns(2)
         with col1:
             st.image("app/data/TEXT.png", caption="Text", width=500)
         with col2:
             st.image("app/data/JSON.png", caption="Json", width=500)
+       
+        # Equation Extraction
+        st.markdown("## Formula Extraction")
+        st.write("We have fine-tuned the DLA model to recognize elements, particularly mathematical formulas, which is essential for determining the branch our system follows. As illustrated in the image below, there are multiple other categories our system is working on, and more can be added if required, as this solution is flexible.")
+        st.image("app/data/DLAwithformula.png", caption="DLA mask visual results", width=700)
+
+    elif selected_tab == "**Evaluation**":
+        st.markdown("# Evaluation")
+        st.write("This section covers we will discuss the evaluation of our approach and share some results.")
+        
         st.markdown("## Metrics to evaluate parsers:")
-        st.markdown("- Number of tokens")
-        st.markdown("- Document cosine similarity")
-        st.markdown("- Processing time (pending)")
-    
-        st.markdown("## Metrics to evaluate downstream tasks:")
-        st.markdown("- Question/Answer - F1 score")
-    
-        # By the Numbers
-        st.markdown("## By the Numbers")
-        st.write("Provide numerical metrics and statistics related to the app's performance.")
+        st.markdown("###  Number of tokens:")
+        st.markdown(" This metric quantifies the amount of text retained or discarded during the extraction process.")
+        st.markdown(" In terms of number of tokens, currently our method is the most similar to the Ground Truth Documentation. It has more tokens than Ground Truth which is ideal as shows that we are not loosing important information")
         st.image("app/data/Lenght_Tokens_Result.png", caption="Amount of tokens after Text Extracion of different Methods", width=800)
+        st.markdown("###  Document cosine similarity:")
+        st.markdown(" It measures the extent to which the extracted text preserves the document's overall meaning. This helps us ensure that we're not discarding crucial information.")
+        st.markdown(" This is telling us that our method comes second, and that there are some differences between the text we extract and our ground truth, but just from this we can’t tell what those differences are.")
         st.image("app/data/cosine_similary_Result.png", caption="Results of Cosine Similarity Againts Ground Truth", width=800)
+        st.markdown("###  Processing time: ")
+        st.markdown("Efficiency matters, and our users value both time and cost savings. We analyze how quickly our method can process large volumes of documents")
         col1, col2 = st.columns(2)
         with col1:
             data = [
@@ -355,25 +416,11 @@ with tab2:
             {'Dataset': 'Our method (DLA+Text extraction)', 'Processing Time per page': '4.47 seconds'}
             ]
             st.table(data)
-
-
-
-
-
-        # Center the table using CSS styles
-        st.markdown(
-            """
-            <style>
-            div.stTable {
-                margin: auto;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True
-    )
-        
-    
-        st.markdown("# Evaluation with a Downstream Task")
+        with col2:
+            st.markdown("Our method exhibits faster performance compared to Nougat but lags behind the rest in terms of speed. It's worth highlighting that both Nougat and our method utilize Vision Transformers, providing versatility for various document types and formats. In contrast, Grobid has been exclusively trained on scientific papers and lacks an easy retraining mechanism. While Pypdf is swift, it falls short in offering the metadata enrichment capabilities we aim to provide.")
+        st.markdown("## Metrics to evaluate downstream tasks:")
+        st.markdown("As our users often employ the extracted data for downstream tasks, such as Question/Answering on a corpus of documents, we've included a specific metric to evaluate the performance of these downstream applications.")
+        st.markdown("We can then compare each of the models against this Question / Answer benchmark on scientific research papers, called Qasper.")
         st.markdown("## Question Answering on Scientific Research Papers (Qasper)")
         col1, col2, col3 = st.columns(3)
         # Create a Streamlit DataFrame from the data
@@ -391,9 +438,6 @@ with tab2:
             st.markdown("- Input: 3,629")
             st.markdown("- Output: 11.4")
         
-        # Downstream Task
-        st.markdown("## Downstream Task")
-        st.write("Explain how the app's results can be used in a downstream task.")
         # Define the data
         st.markdown("## Results")
         col1, col2 = st.columns(2)
@@ -405,3 +449,5 @@ with tab2:
             {'Dataset': 'Our method (DLA+Text extraction)', 'F1 (⇧)': 23.4}
             ]
             st.table(data)
+        with col2:
+            st.markdown(" Our results are among the top performers, with an extremely narrow margin. It's important to note that Nougat was specifically trained on research paper formats. What this shows us is that our model is largely comparable to the state of the art (nougat). The text that we extract is sufficient for the model to answer questions about the paper, which means that we are not losing important details in our pipeline, which is very important.") 
