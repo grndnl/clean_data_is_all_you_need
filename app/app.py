@@ -271,6 +271,7 @@ with tab2:
         st.write("Provide numerical metrics and statistics related to the app's performance.")
         st.image("app/data/Lenght_Tokens_Result.png", caption="Amount of tokens after Text Extracion of different Methods", width=800)
         st.image("app/data/cosine_similary_Result.png", caption="Results of Cosine Similarity Againts Ground Truth", width=800)
+        col1, col2 = st.columns(2)
         with col1:
             data = [
             {'Dataset': 'Grobid', 'Processing Time per page': 'Less than 1 second'},
