@@ -271,7 +271,14 @@ with tab2:
         st.write("Provide numerical metrics and statistics related to the app's performance.")
         st.image("app/data/Lenght_Tokens_Result.png", caption="Amount of tokens after Text Extracion of different Methods", width=800)
         st.image("app/data/cosine_similary_Result.png", caption="Results of Cosine Similarity Againts Ground Truth", width=800)
-   
+        with col1:
+        data = [
+            {'Dataset': 'Grobid', 'Processing Time per page': 'Less than 1 second'},
+            {'Dataset': 'Nougat', 'Processing Time per page': '4.93 seconds'},
+            {'Dataset': 'Pypdf', 'Processing Time per page': 'Less than 1 second'},
+            {'Dataset': 'Our method (DLA+Text extraction)', 'Processing Time per page': '4.47 seconds'}
+            ]
+        st.table(data)
 
 
 
@@ -295,11 +302,11 @@ with tab2:
         col1, col2, col3 = st.columns(3)
         # Create a Streamlit DataFrame from the data
         
-        with col1:
+        with col2:
             
             st.image("app/data/Qasper.png", caption="Qasper", width=400)
           
-        with col2:
+        with col1:
         # Add the caption below the centered image
             
             st.markdown("Total # papers: 1,585")
