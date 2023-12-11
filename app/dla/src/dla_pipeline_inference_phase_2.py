@@ -150,7 +150,11 @@ def generate_doclaylet_dataset(
             page_text = doc_page_json_df["section_text"].to_list()
 
             no_masks = len(page_text)
-            words_per_mask = int((max_text_length / no_masks) * 0.60)
+
+            if no_masks == 0:
+                words_per_mask = max_text_length
+            else:
+                words_per_mask = int((max_text_length / no_masks) * 0.60)
 
             short_page_text = []
             for section_text in page_text:
@@ -415,6 +419,13 @@ def process_documents_phase_2(
         )
 
         for i in range(len(dataset)):
+            if i % 5 == 0:
+                ratio = ((i) / len(dataset)) * 100
+
+                add_to_log_dict(
+                    LOG_LIST, f"Processed {i} / {len(dataset)} pages ({ratio:0.2f}%)"
+                )
+
             document_id = dataset_dict["document_id"][i]
             page_no = dataset_dict["page_no"][i]
             page_image = dataset_dict["images"][i]
@@ -467,7 +478,6 @@ def process_documents_phase_2(
                     LOG_LIST, f"Processing {document_id}_page{page_no:04}: FAILED"
                 )
 
-        
         if save_results:
             add_to_log_dict(LOG_LIST, "Saving mask registry")
             output_path = join(PAGE_MASK_DIR, "mask_registry_phase_2.csv")
@@ -475,43 +485,39 @@ def process_documents_phase_2(
 
             category_count_dict = {}
             for i, row in doc_text_registry.iterrows():
-                json_fp = join(row['output_directory'], row['json_path'])
+                json_fp = join(row["output_directory"], row["json_path"])
 
                 with open(json_fp, "r") as json_file:
                     doc_json = json.load(json_file)
-                    document_id = doc_json['paper_id']
+                    document_id = doc_json["paper_id"]
 
-                    for ii in range(len(doc_json['paper_text'])):
-                        section = doc_json['paper_text'][ii]
-                        page_no = section['section_page']
-                        mask_id = section['section_id']
+                    for ii in range(len(doc_json["paper_text"])):
+                        section = doc_json["paper_text"][ii]
+                        page_no = section["section_page"]
+                        mask_id = section["section_id"]
 
-                        r = mask_registry.query(f"document=='{document_id}' & page_no=={page_no} & mask_id=={mask_id}")
+                        r = mask_registry.query(
+                            f"document=='{document_id}' & page_no=={page_no} & mask_id=={mask_id}"
+                        )
 
-                        new_category = r.iloc[0,:]['new_category_lbl']
+                        new_category = r.iloc[0, :]["new_category_lbl"]
 
                         if new_category not in category_count_dict.keys():
                             category_count_dict[new_category] = 1
-                        
-                        new_section_name = f"{new_category}_{category_count_dict[new_category]:03}"
 
+                        new_section_name = (
+                            f"{new_category}_{category_count_dict[new_category]:03}"
+                        )
 
-                        doc_json['paper_text'][ii]['section_annotation'] = new_category
-                        doc_json['paper_text'][ii]['section_name'] = new_section_name
+                        doc_json["paper_text"][ii]["section_annotation"] = new_category
+                        doc_json["paper_text"][ii]["section_name"] = new_section_name
 
                         category_count_dict[new_category] += 1
-                
-                
+
                 json_output = json.dumps(doc_json, indent=4, ensure_ascii=False)
                 json_fp_new = json_fp.replace(".json", "_Phase_2.json")
                 with open(json_fp_new, "w") as json_file:
                     json_file.write(json_output)
-
-
-
-
-                
-
 
         exit_code = 0
         log_message = f"DLA Phase 2: SUCCESSFULLY PROCESSED {i+1} pages"
