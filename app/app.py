@@ -272,47 +272,47 @@ with tab2:
 
 
 
-    # Center the table using CSS styles
-    st.markdown(
-        """
-        <style>
-        div.stTable {
-            margin: auto;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-)
-    
-
-    st.markdown("# Evaluation with a Downstream Task")
-    st.markdown("## Question Answering on Scientific Research Papers (Qasper)")
-    col1, col2, col3 = st.columns(3)
-    # Create a Streamlit DataFrame from the data
-    
-    with col1:
+        # Center the table using CSS styles
+        st.markdown(
+            """
+            <style>
+            div.stTable {
+                margin: auto;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True
+    )
         
-        st.image("app/data/Qasper.png", caption="Qasper", width=400)
-      
-    with col2:
-    # Add the caption below the centered image
-        
-        st.markdown("Total # papers: 1,585")
-        st.markdown("Total # questions: 5,692")
-        st.markdown("Avg # words:")
-        st.markdown("- Input: 3,629")
-        st.markdown("- Output: 11.4")
     
-    # Downstream Task
-    st.markdown("## Downstream Task")
-    st.write("Explain how the app's results can be used in a downstream task.")
-    # Define the data
-    st.markdown("## Results")
-    with col1:
-        data = [
-        {'Dataset': 'Grobid', 'F1 (⇧)': 22.9},
-        {'Dataset': 'Nougat', 'F1 (⇧)': 23.5},
-        {'Dataset': 'Pypdf', 'F1 (⇧)': 22.1},
-        {'Dataset': 'Our method (DLA+Text extraction)', 'F1 (⇧)': 23.4}
-        ]
-        st.table(data)
+        st.markdown("# Evaluation with a Downstream Task")
+        st.markdown("## Question Answering on Scientific Research Papers (Qasper)")
+        col1, col2, col3 = st.columns(3)
+        # Create a Streamlit DataFrame from the data
+        
+        with col1:
+            
+            st.image("app/data/Qasper.png", caption="Qasper", width=400)
+          
+        with col2:
+        # Add the caption below the centered image
+            
+            st.markdown("Total # papers: 1,585")
+            st.markdown("Total # questions: 5,692")
+            st.markdown("Avg # words:")
+            st.markdown("- Input: 3,629")
+            st.markdown("- Output: 11.4")
+        
+        # Downstream Task
+        st.markdown("## Downstream Task")
+        st.write("Explain how the app's results can be used in a downstream task.")
+        # Define the data
+        st.markdown("## Results")
+        with col1:
+            data = [
+            {'Dataset': 'Grobid', 'F1 (⇧)': 22.9},
+            {'Dataset': 'Nougat', 'F1 (⇧)': 23.5},
+            {'Dataset': 'Pypdf', 'F1 (⇧)': 22.1},
+            {'Dataset': 'Our method (DLA+Text extraction)', 'F1 (⇧)': 23.4}
+            ]
+            st.table(data)
