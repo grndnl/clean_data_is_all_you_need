@@ -211,6 +211,7 @@ def process_pdfs_local(data_directory: str, single_directory_output: bool = Fals
                     "section_annotation": row["category_lbl"],
                     "section_page": row["page_no"],
                     "section_id": row['mask_id'],
+                    "section_image": row["mask_img_file_names"],
                     "section_column": row['column'],
                     "section_im_bbox": (row["x0"], row["y0"], row["x1"], row["y1"]),                    
                 }
