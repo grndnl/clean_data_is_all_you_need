@@ -10,13 +10,4 @@
 pip install -r requirements.txt
 ```
 
-
-# Overview
-# Method
-## Document Layout Analysis
-## Method Selector
-## Text Extraction
-## Equation Extraction
-# Evaluation
-## By the Numbers
-## Downstream Task
+To run the `dla_pipeline` install Docker.
