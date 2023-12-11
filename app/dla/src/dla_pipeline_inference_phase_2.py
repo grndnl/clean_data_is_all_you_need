@@ -333,7 +333,7 @@ def process_documents_phase_2(
     data_directory: str,
     model_weights_path: str,
     model_processor_path: str,
-    save_mask_registry: bool = False,
+    save_results: bool = False,
 ):
     LOG_LIST.clear()
 
@@ -437,7 +437,10 @@ def process_documents_phase_2(
                     verbose=False,
                 )
 
-                if save_mask_registry:
+                # POST PROCESSING #############################################
+                if save_results:
+                    
+                    # SUMMARY IMAGE ##########################################
                     page_mask_registry = mask_registry.query(
                         f"document=='{document_id}' & page_no=={page_no} & is_primary==True"
                     )
@@ -456,6 +459,7 @@ def process_documents_phase_2(
                     )
 
                     plt.imsave(result_image_path, result_image)
+                    
 
             except Exception as e:
                 add_to_log_dict(LOG_LIST, f"ERROR MSG: {e}")
@@ -467,7 +471,7 @@ def process_documents_phase_2(
         log_message = f"DLA Phase 2: SUCCESSFULLY PROCESSED {i+1} pages"
         add_to_log_dict(LOG_LIST, log_message)
 
-        if save_mask_registry:
+        if save_results:
             output_path = join(PAGE_MASK_DIR, "mask_registry_phase_2.csv")
             mask_registry.to_csv(output_path, index=False)
 
@@ -496,7 +500,7 @@ if __name__ == "__main__":
         DATA_DIRECTORY,
         model_weights_path=MODEL_WEIGHTS_PATH,
         model_processor_path=MODEL_PROCESSOR_PATH,
-        save_mask_registry=True,
+        save_results=True,
     )
 
     # print(mask_registry.query("is_primary=='True"))
