@@ -1,3 +1,4 @@
 nougat-ocr
 nougat-ocr[api]
 streamlit
+PyPDF2
