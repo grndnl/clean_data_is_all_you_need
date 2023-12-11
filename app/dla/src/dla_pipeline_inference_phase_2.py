@@ -326,7 +326,6 @@ def process_documents_phase_2(
     model_weights_path: str,
     model_processor_path: str,
     save_mask_registry: bool = False,
-    save_results_images: bool = False,
 ):
     LOG_LIST.clear()
 
@@ -433,7 +432,11 @@ def process_documents_phase_2(
 
         exit_code = 0
         log_message = f"DLA Phase 2: SUCCESSFULLY PROCESSED {i+1} pages"
-        add_to_log_dict(LOG_LIST, log_message)
+        add_to_log_dict(LOG_LIST, log_message)        
+
+        if save_mask_registry:
+            output_path = join(PAGE_MASK_DIR,"mask_registry_phase_2.csv")
+            mask_registry.to_csv(output_path, index=False)
 
     except Exception as e:
         exit_code = 1
@@ -460,6 +463,7 @@ if __name__ == "__main__":
         DATA_DIRECTORY,
         model_weights_path=MODEL_WEIGHTS_PATH,
         model_processor_path=MODEL_PROCESSOR_PATH,
+        save_mask_registry=True
     )
 
     # print(mask_registry.query("is_primary=='True"))
