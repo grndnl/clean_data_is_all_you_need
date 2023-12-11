@@ -321,6 +321,7 @@ with tab2:
         st.write("Explain how the app's results can be used in a downstream task.")
         # Define the data
         st.markdown("## Results")
+        col1, col2 = st.columns(2)
         with col1:
             data = [
             {'Dataset': 'Grobid', 'F1 (⇧)': 22.9},
