@@ -761,7 +761,9 @@ def valadiate_results_csvs(page_mask_directory):
 
 
 def load_mask_registry(page_mask_directory, validate_csvs=False):
-    valadiate_results_csvs(page_mask_directory)
+    if validate_csvs:
+        valadiate_results_csvs(page_mask_directory)
+
     mask_registry = pd.read_csv(join(page_mask_directory, "mask_registry.csv"))
 
     mask_registry.sort_values(["document", "page_no", "mask_id"], inplace=True)
