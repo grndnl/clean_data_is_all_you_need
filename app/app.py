@@ -185,7 +185,8 @@ with tab2:
         st.title("Problem")
         st.write("Parsing unstructured data has traditionally been difficult, time consuming, manually intensive and costly!")
         st.write("While OCR, parsing, and packages for unstructured data have been improving, there hasn’t been a one click solution to understand a document layout and extract all the components with labels, ready to enrich and pass on to downstream tasks.")
-        
+        st.image("app/data/Problem_example.png", caption="Problem Example", width=800)
+
         st.title("Solution")
         items = [
         "Combines two state-of-the-art vision transformer models to segment documents and OCR text and other elements.",
