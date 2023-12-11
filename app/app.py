@@ -198,11 +198,11 @@ with tab2:
         
         # Display the list as a bulleted list
         st.markdown("<ul>" + "".join([f"<li>{item}</li>" for item in items]) + "</ul>", unsafe_allow_html=True)
-        col1, col2 = st.columns(2)
+        col1, col2, col3 = st.columns(3)
         with col1:
-            st.image("app/data/TEXT.png", caption="Problem Example", width=800)
+            st.image("app/data/TEXT.png", caption="Problem Example", width=500)
         with col2:
-            st.image("app/data/JSON.png", caption="Problem Example", width=800)
+            st.image("app/data/JSON.png", caption="Problem Example", width=500)
 
     elif selected_tab == "**Method**":
         st.markdown("# Method")
