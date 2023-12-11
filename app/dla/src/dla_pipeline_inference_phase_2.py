@@ -2,6 +2,7 @@
 
 import json
 import os
+
 # from ast import literal_eval
 from os.path import join
 
@@ -38,6 +39,7 @@ def normalized_box(box, image_width, image_height):
         int(1000 * (box[3] / image_height)),
     ]
 
+
 def get_logit_scores_from_predictions(scores, predictions):
     return scores[np.arange(len(predictions)), predictions]
 
@@ -47,7 +49,9 @@ def logit_to_prob(logit):
     prob = odds / (1 + odds)
     return prob
 
+
 logit_to_prob_vect = np.vectorize(logit_to_prob)
+
 
 def generate_doclaylet_dataset(
     page_image_registry: pd.DataFrame,
@@ -85,7 +89,6 @@ def generate_doclaylet_dataset(
         # doc_json_df["section_im_bbox"] = doc_json_df["section_im_bbox"].apply(
         #     lambda var: literal_eval(str(var))
         # )
-
 
         doc_json_df.sort_values(by=["section_page", "section_id"], inplace=True)
 
@@ -241,14 +244,12 @@ def process_single_page(
     predictions = list(itertools.chain(*predictions))
     token_boxes = list(itertools.chain(*token_boxes))
 
-
     # GET Prediction Probability Scores from the logits
 
     logits_all_cats = logits.squeeze()
 
     prediction_logits = get_logit_scores_from_predictions(logits_all_cats, predictions)
     prediction_scores = logit_to_prob_vect(prediction_logits.detach().numpy())
-
 
     # AGREGATE ALL THE PREDICTIONS FOR THE SAME MASK TYPE
 
@@ -287,7 +288,6 @@ def process_single_page(
         prediction_dict[token_bx] = most_common_value
         prediction_score_dict[token_bx] = cats[most_common_value]
 
-
     # UPDATE MASK REGISTRY
     for box_tup, pred in prediction_dict.items():
         if box_tup in normalized_bbox_page_dict.keys():
@@ -303,7 +303,10 @@ def process_single_page(
             pred_score = prediction_score_dict[box_tup]
             mask_registry.at[matching_index, "new_category_score"] = pred_score
 
-def process_documents_phase_2(data_directory: str):
+
+def process_documents_phase_2(
+    data_directory: str, model_weights_path: str, model_processor_path: str
+):
     exit_code = 1
     error_message = "Not Executed"
     try:
@@ -313,12 +316,6 @@ def process_documents_phase_2(data_directory: str):
         S4_JSON_TEXT_OUTPUTS_DIR = join(data_directory, "s4_json_text_output")
         PAGE_MASK_DIR = join(S3_OUTPUTS_DIR, "page_masks")
 
-        PRETRAINED_MODEL_DIR = "/user/w210/large_file_repo/models_pretrained"
-        MODEL_TAG = (
-            "layoutlmv3-finetuned-DocLayNet_large_sci_23_12_02-15_50_34/checkpoint-5946"
-        )
-        MODEL_WEIGHTS = join(PRETRAINED_MODEL_DIR, MODEL_TAG)
-        MODEL_PROCESSOR = join(PRETRAINED_MODEL_DIR, "microsoft-layoutlmv3-base-processor")
         MODEL_CATEGORIES_JSON = join(data_directory, "dla_categories_doclaynet.json")
 
         GLOBAL_BATCH_SIZE = 1
@@ -331,8 +328,8 @@ def process_documents_phase_2(data_directory: str):
             S3_OUTPUTS_DIR,
             S4_JSON_TEXT_OUTPUTS_DIR,
             PAGE_MASK_DIR,
-            MODEL_WEIGHTS,
-            MODEL_PROCESSOR,
+            model_weights_path,
+            model_processor_path,
             MODEL_CATEGORIES_JSON,
         ]:
             assert os.path.exists(pth), f"PATH NOT FOUND: {pth}"
@@ -345,7 +342,9 @@ def process_documents_phase_2(data_directory: str):
 
         page_image_registry = pd.read_csv(join(S3_OUTPUTS_DIR, "page_images_list.csv"))
 
-        doc_text_registry = pd.read_csv(join(S4_JSON_TEXT_OUTPUTS_DIR, "text_extract.csv"))
+        doc_text_registry = pd.read_csv(
+            join(S4_JSON_TEXT_OUTPUTS_DIR, "text_extract.csv")
+        )
 
         doc_text_registry["json_path"] = doc_text_registry.apply(
             lambda var: var["pdf_file"].replace(".pdf", ".json"),
@@ -353,7 +352,11 @@ def process_documents_phase_2(data_directory: str):
         )
 
         ####################################################
-        dataset, dataset_dict, normalized_bbox_page_dict_list = generate_doclaylet_dataset(
+        (
+            dataset,
+            dataset_dict,
+            normalized_bbox_page_dict_list,
+        ) = generate_doclaylet_dataset(
             page_image_registry,
             doc_text_registry,
             mask_registry,
@@ -370,13 +373,14 @@ def process_documents_phase_2(data_directory: str):
 
         ## LOAD MODEL
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        processor = LayoutLMv3Processor.from_pretrained(MODEL_PROCESSOR, apply_ocr=False)
+        processor = LayoutLMv3Processor.from_pretrained(
+            model_processor_path, apply_ocr=False
+        )
         model = LayoutLMv3ForTokenClassification.from_pretrained(
-            MODEL_WEIGHTS, id2label=id2label, label2id=label2id
+            model_weights_path, id2label=id2label, label2id=label2id
         )
 
         for i in range(len(dataset)):
-
             try:
                 torch.cuda.empty_cache()
                 process_single_page(
@@ -398,7 +402,6 @@ def process_documents_phase_2(data_directory: str):
         exit_code = 1
         error_message = f"DLA Phase 2, PROCESSING ERROR: {e}"
 
-
     return mask_registry, exit_code, error_message
 
 
@@ -408,8 +411,17 @@ if __name__ == "__main__":
 
     DATA_DIRECTORY = "/data"
 
-    mask_registry = process_documents_phase_2(DATA_DIRECTORY)
+    PRETRAINED_MODEL_DIR = "/model_weights/LayoutLMV3/"
+    MODEL_TAG = "base-finetuned-doclaynet-sci-large_classification_only"
+    MODEL_WEIGHTS_PATH = join(PRETRAINED_MODEL_DIR, MODEL_TAG)
+    MODEL_PROCESSOR_PATH = join(
+        PRETRAINED_MODEL_DIR, "microsoft-layoutlmv3-base-processor"
+    )
+
+    mask_registry = process_documents_phase_2(
+        DATA_DIRECTORY,
+        model_weights_path=MODEL_WEIGHTS_PATH,
+        model_processor_path=MODEL_PROCESSOR_PATH,
+    )
 
     # print(mask_registry.query("is_primary=='True"))
-
-    
