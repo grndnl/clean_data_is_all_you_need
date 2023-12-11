@@ -176,44 +176,110 @@ with tab2:
     # Main content area
     if selected_tab == "**Overview**":
         st.markdown("# The Team")
+        st.write("In this data centric world we felt the need to move forward in our education. We are a group coming from different backgrounds.")
+        st.write("This project was a multifaceted endeavor, encompassing software development, visual transformers, computer vision, and classification algorithms. We collaborated seamlessly, taking on various roles to overcome the unique challenges it presented.")
         st.image("app/data/Team.png", caption="Team", width=800)
-        st.write("This is an overview of the app's purpose and functionality.")
-        st.write("You can add more details and content here.")
-        st.title("User")
-        st.write("Professional needing text extraction on diversity of PDFs for different downstream applications.")
-        st.image("app/data/User_image.png", caption="Intended User", width=800)
+
+        
+
+
         st.title("Problem")
         st.write("Parsing unstructured data has traditionally been difficult, time consuming, manually intensive and costly!")
         st.write("While OCR, parsing, and packages for unstructured data have been improving, there hasn’t been a one click solution to understand a document layout and extract all the components with labels, ready to enrich and pass on to downstream tasks.")
         st.image("app/data/Problem_example.png", caption="Problem Example", width=800)
 
         st.title("Solution")
-        items = [
-        "Combines two state-of-the-art vision transformer models to segment documents and OCR text and other elements.",
-        "Easy to use.",
-        "Accurate reproduction of data.",
-        "Faster than parsing via OCR/regex.",
-        "The structure can be used in downstream tasks."
-    ]
+
+        # Solution Description
+        st.markdown("# Our Solution: Takes Unstructured data in PDF Documents and returns, Semi-structured Data")
+
+        # Introduction
+        st.write("In the data-centric world we live in, the need for efficient data extraction from unstructured PDF documents has become increasingly important. Our solution is a simple yet powerful application designed to address this challenge. It takes unstructured data in PDF documents and transforms it into semi-structured data, making it easier for you to work with your valuable information.")
+
+        # Key Features
+        st.markdown("## Key Features")
+        st.write("Our solution offers a range of features to enhance your data extraction experience:")
+
+        # Feature 1: Advanced Vision Transformer Models
+        st.markdown("### 1. Advanced Vision Transformer Models")
+        st.write("We've integrated two cutting-edge vision transformer models to tackle document element identification and text extraction integrated with Optical Character Recognition (OCR). These models work together seamlessly to provide accurate and reliable results.")
+
+        # Feature 2: User-Friendly Experience
+        st.markdown("### 2. User-Friendly Experience")
+        st.write("Our application is designed with user-friendliness in mind. You don't need to be an expert in data extraction to use it. It simplifies the process, making it accessible to professionals from various backgrounds.")
+
+        # Feature 3: Accurate Data Reproduction
+        st.markdown("### 3. Accurate Data Reproduction")
+        st.write("One of our primary goals is to ensure the accurate reproduction of your data. You can rely on our solution to faithfully capture the content from PDF documents, reducing the risk of information loss or distortion.")
+
+        # Feature 4: Improved Processing Speed
+        st.markdown("### 4. Improved Processing Speed")
+        st.write("Compared to traditional methods like OCR and regex parsing, our solution offers comparable data extraction processing time but enrich with metadata. You'll save valuable time while getting the results you need.")
+
+        # Feature 5: Structured Output
+        st.markdown("### 5. Structured Output")
+        st.write("Our application provides structured output in either JSON or plain text format. This structured data can be seamlessly integrated into downstream tasks, such as Natural Language Processing (NLP) models, fine-tuning, or custom text extraction applications.")
+
+        # Conclusion
+        st.write("Our solution combines state-of-the-art vision transformer models with user-friendliness, accuracy, and speed, making it a versatile tool for professionals across various domains. Experience the difference in PDF data extraction with our application today!")
+
+           
         
         # Display the list as a bulleted list
-        st.markdown("<ul>" + "".join([f"<li>{item}</li>" for item in items]) + "</ul>", unsafe_allow_html=True)
-        col1, col2, col3 = st.columns(3)
+        
+        col1, col2 = st.columns(2)
         with col1:
             st.image("app/data/TEXT.png", caption="Problem Example", width=500)
         with col2:
             st.image("app/data/JSON.png", caption="Problem Example", width=500)
+
+
+        st.title("User")
+        st.write("Our application caters to a diverse user base, as it is designed to assist in various downstream tasks. We define our users as professionals who require text extraction from unstructured documents to support a range of applications. These applications encompass the creation of NLP models, LLMs, RAG models, fine-tuning of existing models, or the implementation of simple text extraction solutions.")
+        st.write("Our users come from a wide array of domains and professions, including data analysts, scientists, business professionals, academic researchers, legal experts, and many others who can benefit from the versatile downstream applications our application supports.")
+        st.image("app/data/User_image.png", caption="Intended User", width=800)
+        st.markdown("## User Profiles")
+        st.write("Our application caters to a diverse group of professionals who require text extraction from PDF documents for various purposes. Here are some of the key user profiles:")
+
+        # User Descriptions
+        st.markdown("# User Profiles")
+
+        # Define user profiles and descriptions
+        user_profiles = {
+        "Data Analysts and Scientists": "Data analysts and scientists often need to extract data from PDF documents for analysis. Our tool, which semi-structures this data, can significantly streamline their workflows.",
+        "Business Professionals": "Business professionals in fields such as finance, marketing, and management frequently encounter data in PDF format, such as reports, financial statements, and market research. Our tool, which semi-structures this data, makes it easier to integrate information into their decision-making processes.",
+        "Academic Researchers": "Academic researchers across various fields deal with large volumes of data in PDF format, including scholarly articles, data reports, and archival documents. Our tool, which helps structure this data, aids in more efficient data analysis and research.",
+        "Government and Public Sector Officials": "Many government documents, including legal documents, policy papers, and statistical reports, are in PDF format. Our tool, which semi-structures this data, facilitates better data management and accessibility.",
+        "Healthcare Professionals": "In healthcare, patient records, research papers, and clinical trial data are often in PDF format. Our tool, which can extract and semi-structure this data, is beneficial for analysis and record-keeping.",
+        "Legal Professionals": "Lawyers and legal researchers frequently work with a large number of legal documents, many of which are in PDF format. Our tool, which semi-structures this data, aids in legal research and case preparation.",
+        "Archivists and Librarians": "These professionals handle a large amount of historical and archival documents, often stored in PDF format. Our tool, which semi-structures this information, makes cataloging and retrieval more efficient.",
+        "IT Professionals and Developers": "IT professionals and developers often need to integrate data from various sources, including PDFs, into software applications or databases. Our semi-structured data extraction tool is invaluable in this process.",
+        "Educational Professionals": "Teachers and educators may use our tool to organize and analyze educational material and research papers, which are often in PDF format.",
+        "Marketing Professionals": "Marketing professionals can use our tool for analyzing market research reports, customer feedback, and other marketing materials that are frequently in PDF format."
+        }
+
+        # Display user profiles and descriptions
+        for profile, description in user_profiles.items():
+            st.markdown(f"### {profile}")
+            st.write(description)
 
     elif selected_tab == "**Method**":
         st.markdown("# Method")
         st.write("This section provides details about the methods used in the app.")
         st.image("app/data/Pipeline.png", caption="Application Pipeline", width=1000)
         
-        #Vision Transformer
-        st.markdown("## Vision Transformer")
-        st.write("Describe Vision Transfor method here.")
+        
+        # Technical Architecture Overview
+        st.markdown("## Technical Architecture Overview: Vision Transformer")
+
+        st.write("In this section, we will delve into the technical architecture of our solution. Our system employs two Vision Transformer models (ViTs). These ViTs, similar to traditional Transformers such as BERT and GPT, are designed to process sequential data using self-attention mechanisms, enabling them to grasp context and predict sequential output.")
+
+        st.write("However, what sets ViTs apart is their ability to work with images as sequences of pixels or patches. This unique approach allows them to comprehend visual data spatially and recognize intricate relationships within images.")
+
+        st.write("We will explore how our system utilizes these ViTs for Optical Character Recognition (OCR) tasks, effectively extracting text and other elements from various types of documents. Additionally, we will discuss how these models can be applied to gain a comprehensive understanding of a document's layout and structure.")
+
        
-        st.image("app/data/Vision_transformer.png", caption="Vision Transformer Information", width=1000)
+        st.image("app/data/Vision_transformer.png", caption="Vision Transformer Information", width=700)
     
         st.markdown("## Document Layout Analysis - Example")
         st.write("Describe Vision Transfor method here.")    
@@ -235,7 +301,15 @@ with tab2:
         
         # Nougat
         st.markdown("## Nougat - Visual Transformer")
-        st.write("Describe Nougat method here.")
+        # Neural Optical Understanding for Academic Documents (Nougat)
+        st.markdown("## Neural Optical Understanding for Academic Documents (Nougat)")
+
+        st.write("Nougat is an advanced document understanding tool that leverages state-of-the-art technology. It is powered by OCR-free Document Understanding Transformer (Donut), which demonstrated the ViT's capability to understand complex documents like receipts and business cards without the need for OCR (Optical Character Recognition).")
+
+        st.write("The Nougat team at Meta extended this concept to scientific papers by training the model on LaTex versions of the documents as opposed to images. This innovative approach resulted in remarkably high extraction accuracy for plain text, as well as other challenging elements like tables and formulas, which are typically difficult for traditional OCR methods to handle.")
+
+        st.write("Thanks to its Transformer-based architecture, Nougat offers highly parallelizable and cost-effective processing while maintaining exceptional accuracy. However, for our project, the output format wasn't the semi-structured JSON we aimed for. Achieving this required a prior understanding of the document's layout, followed by fine-tuning Nougat to interpret the data accordingly. We are actively working on implementing these enhancements for our final presentation. Now, for more insights into document layout, let's turn to Carlos.")
+
         st.image("app/data/NOUGAT.png", caption="Application Pipeline", width=700)
     
         # Method Selector
@@ -247,9 +321,10 @@ with tab2:
         st.write("Discuss the text extraction method and its capabilities.")
         
         # Equation Extraction
-        st.markdown("## Equation Extraction")
+        st.markdown("## Formula Extraction")
         st.write("Explain how the equation extraction feature works.")
-        
+        st.image("app/data/DLAwithformula.png", caption="DLA mask visual results", width=700)
+
     elif selected_tab == "**Evaluation**":
         st.markdown("# Evaluation")
         st.write("This section covers the evaluation of the app's performance.")
