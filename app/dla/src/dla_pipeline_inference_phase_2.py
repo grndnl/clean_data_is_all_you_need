@@ -1,7 +1,9 @@
 # %% IMPORTS
 
+import itertools
 import json
 import os
+from datetime import datetime
 
 # from ast import literal_eval
 from os.path import join
@@ -17,7 +19,7 @@ from transformers import (
     LayoutLMv3Processor,
     LayoutLMv3Tokenizer,
 )
-import itertools
+
 from dla_pipeline_support_functions import load_mask_registry
 
 pd.set_option("display.max_rows", 999)
@@ -28,6 +30,21 @@ pd.set_option("display.width", 999)
 pd.options.mode.chained_assignment = None  # default='warn'
 
 # %% Functions
+
+LOG_LIST = []
+
+
+def add_to_log_dict(log_list: list, message: str, verbose: bool = True):
+    current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    entry = {"time": current_timestamp, "message": message}
+
+    log_list.append(entry)
+
+    if verbose:
+        print("*" * 80)
+        print(entry)
+        print("")
 
 
 # Normalize box diamentions to range 0 to 1000
@@ -305,10 +322,18 @@ def process_single_page(
 
 
 def process_documents_phase_2(
-    data_directory: str, model_weights_path: str, model_processor_path: str
+    data_directory: str,
+    model_weights_path: str,
+    model_processor_path: str,
+    save_mask_registry: bool = False,
+    save_results_images: bool = False,
 ):
+    LOG_LIST.clear()
+
     exit_code = 1
-    error_message = "Not Executed"
+    log_message = "Starting DLA PHASE 2 Execution"
+    add_to_log_dict(LOG_LIST, log_message)
+
     try:
         S1_INPUT_PDFS_DIR = join(data_directory, "s1_input_pdfs")
         S2_DLA_INPUTS_DIR = join(data_directory, "s2_dla_inputs")
@@ -381,6 +406,8 @@ def process_documents_phase_2(
         )
 
         for i in range(len(dataset)):
+            document_id = dataset_dict["document_id"][i]
+            page_no = dataset_dict["page_no"][i]
             try:
                 torch.cuda.empty_cache()
                 process_single_page(
@@ -393,16 +420,27 @@ def process_documents_phase_2(
                     mask_registry=mask_registry,
                     id2label=id2label,
                 )
+                add_to_log_dict(
+                    LOG_LIST,
+                    f"Processing {document_id}_page{page_no:04}: COMPLETE",
+                    verbose=False,
+                )
             except Exception as e:
-                pass
+                add_to_log_dict(LOG_LIST, f"ERROR MSG: {e}")
+                add_to_log_dict(
+                    LOG_LIST, f"Processing {document_id}_page{page_no:04}: FAILED"
+                )
 
         exit_code = 0
-        error_message = f"DLA Phase 2: SUCCESSFULLY PROCESSED {i+1} pages"
+        log_message = f"DLA Phase 2: SUCCESSFULLY PROCESSED {i+1} pages"
+        add_to_log_dict(LOG_LIST, log_message)
+
     except Exception as e:
         exit_code = 1
-        error_message = f"DLA Phase 2, PROCESSING ERROR: {e}"
+        log_message = f"DLA Phase 2, PROCESSING ERROR: {e}"
+        add_to_log_dict(LOG_LIST, log_message)
 
-    return mask_registry, exit_code, error_message
+    return mask_registry, exit_code, LOG_LIST.copy()
 
 
 if __name__ == "__main__":
@@ -418,7 +456,7 @@ if __name__ == "__main__":
         PRETRAINED_MODEL_DIR, "microsoft-layoutlmv3-base-processor"
     )
 
-    mask_registry = process_documents_phase_2(
+    process_documents_phase_2(
         DATA_DIRECTORY,
         model_weights_path=MODEL_WEIGHTS_PATH,
         model_processor_path=MODEL_PROCESSOR_PATH,
