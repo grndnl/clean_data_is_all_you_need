@@ -31,6 +31,8 @@ from dla_pipeline_support_functions import (
 
 from dla_text_extraction import process_pdfs_local
 
+from dla_pipeline_inference_phase_2 import process_documents_phase_2
+
 pd.set_option("display.max_rows", 999)
 pd.set_option("display.max_columns", 999)
 pd.set_option("display.width", 999)
@@ -50,6 +52,7 @@ def process_documents(
     continue_from_previous: bool = False,
     model_type: str = "DIT",
     use_cpu: bool = False,
+    phase_2_processing: bool = True,
 ):
     """
     Function that runs the DLA pipeline
@@ -276,13 +279,40 @@ def process_documents(
         document_set.save_page_images_list()
         document_set.save_mask_registry()
 
+        ## Extract Text
+        ###############################################
+
         document_set.add_to_log_dict("Extracting Text")
-        process_pdfs_local(DATA_DIRECTORY,single_directory_output=False)
+        process_pdfs_local(DATA_DIRECTORY, single_directory_output=False)
         document_set.add_to_log_dict("Extracting Text: Complete")
 
+        ## DLA Phase 2
+        ###############################################
+
+        if phase_2_processing:
+            P2_PRETRAINED_MODEL_DIR = "/model_weights/LayoutLMV3/"
+            P2_MODEL_TAG = "base-finetuned-doclaynet-sci-large_classification_only"
+
+            P2_MODEL_WEIGHTS_PATH = join(P2_PRETRAINED_MODEL_DIR, P2_MODEL_TAG)
+
+            P2_MODEL_PROCESSOR_PATH = join(
+                P2_PRETRAINED_MODEL_DIR, "microsoft-layoutlmv3-base-processor"
+            )
+
+            mask_registry, exit_code, p2_process_log = process_documents_phase_2(
+                DATA_DIRECTORY,
+                model_weights_path=P2_MODEL_WEIGHTS_PATH,
+                model_processor_path=P2_MODEL_PROCESSOR_PATH,
+                save_results=True,
+            )
+
+            document_set.log_list.extend(p2_process_log)
+
+        ###############################################
         document_set.add_to_log_dict("Full process completed")
         exit_code = 0  # 0 for no errors
         exit_msg = f"SUCCESFULLY PROCESSED {len(document_set.document_list)} documents and {len(document_set.page_images_list)} pages"
+
 
     except Exception as e:
         document_set.add_to_log_dict("PROCESS ERROR")
@@ -295,7 +325,6 @@ def process_documents(
         document_set.save_mask_registry()
 
     finally:
-
         document_set.save_log()
 
         return exit_code, exit_msg, S3_OUTPUTS_DIR, S4_JSON_TEXT_OUTPUTS_DIR

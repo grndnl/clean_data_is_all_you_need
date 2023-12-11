@@ -341,6 +341,8 @@ def process_documents_phase_2(
     log_message = "Starting DLA PHASE 2 Execution"
     add_to_log_dict(LOG_LIST, log_message)
 
+    add_to_log_dict(LOG_LIST, f"Saving Phase 2 Results: {save_results}")
+
     try:
         S1_INPUT_PDFS_DIR = join(data_directory, "s1_input_pdfs")
         S2_DLA_INPUTS_DIR = join(data_directory, "s2_dla_inputs")
@@ -439,7 +441,6 @@ def process_documents_phase_2(
 
                 # POST PROCESSING #############################################
                 if save_results:
-                    
                     # SUMMARY IMAGE ##########################################
                     page_mask_registry = mask_registry.query(
                         f"document=='{document_id}' & page_no=={page_no} & is_primary==True"
@@ -459,7 +460,6 @@ def process_documents_phase_2(
                     )
 
                     plt.imsave(result_image_path, result_image)
-                    
 
             except Exception as e:
                 add_to_log_dict(LOG_LIST, f"ERROR MSG: {e}")

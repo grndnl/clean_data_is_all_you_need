@@ -45,6 +45,7 @@ async def get_dla_masks(
     model_type: str = "DIT",
     full_inference: bool = True,
     continue_from_previous : bool = False,
+    phase_2_processing: bool = True
 ):
     response_dict = {
         "opt_use_cpu": use_cpu,
@@ -74,6 +75,7 @@ async def get_dla_masks(
         continue_from_previous=continue_from_previous,
         model_type=model_type,
         use_cpu=use_cpu,
+        phase_2_processing=phase_2_processing
     )
 
     if response_dict["exit_code"] != 0:
