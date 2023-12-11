@@ -8,19 +8,27 @@ from datetime import datetime
 # from ast import literal_eval
 from os.path import join
 
+import matplotlib.pyplot as plt
+
 import numpy as np
 import pandas as pd
 import torch
 from datasets import Dataset
 from PIL.JpegImagePlugin import JpegImageFile
+from PIL import Image
+
 from transformers import (
     LayoutLMv3FeatureExtractor,
     LayoutLMv3ForTokenClassification,
     LayoutLMv3Processor,
     LayoutLMv3Tokenizer,
 )
-
-from dla_pipeline_support_functions import load_mask_registry
+from detectron2.data import MetadataCatalog
+from dla_pipeline_support_classes import DLAVisualizer
+from dla_pipeline_support_functions import (
+    load_mask_registry,
+    get_filename_without_extension,
+)
 
 pd.set_option("display.max_rows", 999)
 pd.set_option("display.max_columns", 999)
@@ -407,6 +415,10 @@ def process_documents_phase_2(
         for i in range(len(dataset)):
             document_id = dataset_dict["document_id"][i]
             page_no = dataset_dict["page_no"][i]
+            page_image = dataset_dict["images"][i]
+            doc_page_id = (
+                f"{get_filename_without_extension(document_id)}_page_{page_no:04}"
+            )
             try:
                 torch.cuda.empty_cache()
                 process_single_page(
@@ -421,9 +433,30 @@ def process_documents_phase_2(
                 )
                 add_to_log_dict(
                     LOG_LIST,
-                    f"Processing {document_id}_page{page_no:04}: COMPLETE",
+                    f"Processing {doc_page_id}: COMPLETE",
                     verbose=False,
                 )
+
+                if save_mask_registry:
+                    page_mask_registry = mask_registry.query(
+                        f"document=='{document_id}' & page_no=={page_no} & is_primary==True"
+                    )
+                    v = DLAVisualizer(
+                        img_rgb=page_image,
+                        metadata=MetadataCatalog.get("publaynet_val"),
+                        scale=1.0,
+                    )
+                    result = v.draw_instance_from_mask_registry(page_mask_registry)
+                    result_image = result.get_image()[:, :, ::-1]
+
+                    result_image_path = join(
+                        S4_JSON_TEXT_OUTPUTS_DIR,
+                        get_filename_without_extension(document_id),
+                        f"{doc_page_id}_Phase_2_Final_DLA.jpg",
+                    )
+
+                    plt.imsave(result_image_path, result_image)
+
             except Exception as e:
                 add_to_log_dict(LOG_LIST, f"ERROR MSG: {e}")
                 add_to_log_dict(
@@ -432,10 +465,10 @@ def process_documents_phase_2(
 
         exit_code = 0
         log_message = f"DLA Phase 2: SUCCESSFULLY PROCESSED {i+1} pages"
-        add_to_log_dict(LOG_LIST, log_message)        
+        add_to_log_dict(LOG_LIST, log_message)
 
         if save_mask_registry:
-            output_path = join(PAGE_MASK_DIR,"mask_registry_phase_2.csv")
+            output_path = join(PAGE_MASK_DIR, "mask_registry_phase_2.csv")
             mask_registry.to_csv(output_path, index=False)
 
     except Exception as e:
@@ -463,7 +496,7 @@ if __name__ == "__main__":
         DATA_DIRECTORY,
         model_weights_path=MODEL_WEIGHTS_PATH,
         model_processor_path=MODEL_PROCESSOR_PATH,
-        save_mask_registry=True
+        save_mask_registry=True,
     )
 
     # print(mask_registry.query("is_primary=='True"))

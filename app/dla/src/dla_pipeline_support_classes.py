@@ -291,6 +291,45 @@ class DLAVisualizer(Visualizer):
         )
         return self.output
 
+    def draw_instance_from_mask_registry(self, mask_registry):
+
+        mask_shape = mask_registry['mask_shape'].values[0]
+        
+        x0 = mask_registry['x0'].values
+        y0 = mask_registry['y0'].values
+        x1 = mask_registry['x1'].values
+        y1 = mask_registry['y1'].values
+
+
+        boxes = np.vstack((x0, y0, x1, y1)).T
+
+        labels = mask_registry['new_category_lbl'].values
+
+        masks = []
+
+        for i, r in mask_registry.iterrows():
+            msk = generate_rectangular_mask(x0=r['x0'], x1=r['x1'], y0=r['y0'], y1=r['y1'], shape=mask_shape)
+            masks.append(GenericMask(msk, mask_shape[0], mask_shape[1]))
+
+        # masks = [
+        #     GenericMask(detect.mask, detect.mask.shape[0], detect.mask.shape[1])
+        #     for detect in predictions
+        # ]
+        keypoints = None
+
+        colors = None
+        alpha = 0.5
+
+        self.overlay_instances(
+            masks=masks,
+            boxes=boxes,
+            labels=labels,
+            keypoints=keypoints,
+            assigned_colors=colors,
+            alpha=alpha,
+        )
+        return self.output
+
 
 # %% PDF CLASSES
 
