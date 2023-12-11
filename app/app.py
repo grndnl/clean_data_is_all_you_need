@@ -195,10 +195,15 @@ with tab2:
         "Faster than parsing via OCR/regex.",
         "The structure can be used in downstream tasks."
     ]
-    
+        
         # Display the list as a bulleted list
         st.markdown("<ul>" + "".join([f"<li>{item}</li>" for item in items]) + "</ul>", unsafe_allow_html=True)
-    
+        col1, col2 = st.columns(2)
+        with col1:
+            st.image("app/data/TEXT.png", caption="Problem Example", width=800)
+        with col2:
+            st.image("app/data/JSON.png", caption="Problem Example", width=800)
+
     elif selected_tab == "**Method**":
         st.markdown("# Method")
         st.write("This section provides details about the methods used in the app.")
