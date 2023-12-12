@@ -378,6 +378,18 @@ with tab2:
         st.write("Thanks to its Transformer-based architecture, Nougat offers highly parallelizable and cost-effective processing while maintaining exceptional accuracy. However, for our project, the output format wasn't the semi-structured JSON we aimed for. Achieving this required a prior understanding of the document's layout, followed by fine-tuning Nougat to interpret the data accordingly. We are actively working on implementing these enhancements for our final presentation. Now, for more insights into document layout, let's turn to Carlos.")
 
         st.image("app/data/NOUGAT.png", caption="Application Pipeline", width=700)
+        
+
+        #Nougat Fine tunning
+        st.markdown("## Nougat Fine tunning")
+        st.write("Images have been processed using MMDs and augmented with structural data obtained from DLA (Diffusion-Limited Aggregation). The fine-tuning process took place on 4 A100 GPUs for a total of 14 hours. The output data is now structured and ready to be parsed in JSON format.")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.image("app/data/nougat_finetunning.png", caption="Nougat Fine tuned Results", width=700)
+        
+        with col2:
+            st.image("app/data/nougat_finetunning2.jpg", caption="Nougat Fine tuned Results", width=700)
+
         # Text and Json Extraction
         st.markdown("## Text and Json Extraction")
         st.write("Once we get the DLA outputs, we obtained and indexed dataset of masks, classification and positions. These are use to create text files and json files. We utilize PyMUPDF to extract the information and structured as the example below")
