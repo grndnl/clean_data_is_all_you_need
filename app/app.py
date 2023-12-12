@@ -385,10 +385,10 @@ with tab2:
         st.write("Images have been processed using MMDs and augmented with structural data obtained from DLA (Diffusion-Limited Aggregation). The fine-tuning process took place on 4 A100 GPUs for a total of 14 hours. The output data is now structured and ready to be parsed in JSON format.")
         col1, col2 = st.columns(2)
         with col1:
-            st.image("app/data/nougat_finetunning.png", caption="Nougat Fine tuned Results", width=700)
+            st.image("app/data/nougat_finetunning.png", caption="Nougat Fine tuned Results", width=500)
         
         with col2:
-            st.image("app/data/nougat_finetunning2.png", caption="Nougat Fine tuned Results", width=700)
+            st.image("app/data/nougat_finetunning2.png", caption="Nougat Fine tuned Results", width=500)
 
         # Text and Json Extraction
         st.markdown("## Text and Json Extraction")
