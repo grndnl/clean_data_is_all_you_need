@@ -111,7 +111,7 @@ with tab1:
     col1, col2, col3, col4 = st.columns([1, 0.3, 1, 1], gap='large')
     with col1:
         # dropdown that allows to select one PDF file
-        uploaded_files = st.selectbox("Select a PDF file", ["1603.01514.pdf", "1603.00727.pdf"])
+        uploaded_files = st.selectbox("Select a PDF file", ["1603.01514.pdf", "1604.00727.pdf"])
         uploaded_files = [uploaded_files]
         enable()
 
