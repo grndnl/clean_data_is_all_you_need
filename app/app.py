@@ -388,7 +388,7 @@ with tab2:
             st.image("app/data/nougat_finetunning.png", caption="Nougat Fine tuned Results", width=700)
         
         with col2:
-            st.image("app/data/nougat_finetunning2.jpg", caption="Nougat Fine tuned Results", width=700)
+            st.image("app/data/nougat_finetunning2.png", caption="Nougat Fine tuned Results", width=700)
 
         # Text and Json Extraction
         st.markdown("## Text and Json Extraction")
