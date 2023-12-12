@@ -31,7 +31,7 @@ def displayPDF(uploaded_files):
     # Display file
     with st.expander("**Uploaded PDFs**"):
         st.markdown(f"**{uploaded_files[0]}**")
-        st.image("image.png", width=300)
+        st.image("image.png", use_column_width=True) #, width=300)
 
 
 def display_mask(upload_files):
@@ -41,10 +41,10 @@ def display_mask(upload_files):
             name = uploaded_file.name
 
             # load image file
-            image_file = Image.open("app/data/1603.09631_page_0001_dev_img_1_base_dla_result.jpg") # TODO This is actually the wrong image
+            image_file = Image.open(f"app/data/{name[:-4]}_page_0001_Phase_2_Final_DLA.jpg")
 
             st.markdown(f"**{name}**")
-            st.image(image_file, width=300)  # , caption='Predicted masks for the first page'use_column_width=True)
+            st.image(image_file, use_column_width=True) # width=300)  # , caption='Predicted masks for the first page'use_column_width=True)
 
 
 def display_json(upload_files):
@@ -53,7 +53,7 @@ def display_json(upload_files):
             uploaded_file = Path("app/data/" + uploaded_file)
             name = uploaded_file.name
             # load json file
-            with open("app/data/processed_files/1603.09631.json", "r") as f:
+            with open(f"app/data/processed_files/{name[:-4]}_Phase_2.json", "r") as f:
                 json_file = json.load(f)
 
             st.divider()
@@ -67,7 +67,7 @@ def display_markdown(upload_files):
             uploaded_file = Path("app/data/" + uploaded_file)
             name = uploaded_file.name
             # load md file
-            with open("app/data/processed_files/1603.09631.txt", "r", encoding="utf8") as f:
+            with open(f"app/data/processed_files/{name[:-4]}.txt", "r", encoding="utf8") as f:
                 txt_file = f.read()
 
             st.divider()
@@ -111,7 +111,7 @@ with tab1:
     col1, col2, col3, col4 = st.columns([1, 0.3, 1, 1], gap='large')
     with col1:
         # dropdown that allows to select one PDF file
-        uploaded_files = st.selectbox("Select a PDF file", ["1603.09631.pdf"])
+        uploaded_files = st.selectbox("Select a PDF file", ["1603.01514.pdf", "1603.00727.pdf"])
         uploaded_files = [uploaded_files]
         enable()
 
