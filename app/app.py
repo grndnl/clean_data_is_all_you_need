@@ -81,7 +81,7 @@ def display_download_button():
 
 
 # ------------Page configs-----------------------------------------------------------------------
-st.set_page_config(layout='wide')
+st.set_page_config(layout='wide', page_title="📄 Clean Data is All You Need")
 
 
 # ------------Session State-----------------------------------------------------------------------
@@ -94,7 +94,6 @@ if "disabled" not in st.session_state:
 # ----------UI logic-------------------------------------------------------------------------
 # Title of the page
 st.title('📄 Clean Data is All You Need')
-st.set_page_config(page_title="📄 Clean Data is All You Need")
 
 # Sidebar for navigation and control
 with st.sidebar:
