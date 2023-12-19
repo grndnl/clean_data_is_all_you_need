@@ -81,7 +81,9 @@ def display_download_button():
 
 
 # ------------Page configs-----------------------------------------------------------------------
-st.set_page_config(layout='wide', page_title="📄 Clean Data is All You Need")
+st.set_page_config(layout='wide', page_title="Clean Data is All You Need", page_icon='📄', menu_items={
+        'Contact us': 'mailto:grndnl@berkeley.edu',
+    })
 
 
 # ------------Session State-----------------------------------------------------------------------
@@ -108,7 +110,7 @@ tab1, tab2 = st.tabs(["Demo", "Documentation"])
 with tab1:
     # Columns
     # 4 columns of different sizes
-    col1, col2, col3, col4 = st.columns([1, 1, 1, 1], gap='large')
+    col1, col2, col3, col4 = st.columns([1, 0.5, 1, 1], gap='large')
     with col1:
         # dropdown that allows to select one PDF file
         uploaded_files = st.selectbox("Select a PDF file", ["1603.01514.pdf", "1604.00727.pdf"])
@@ -147,7 +149,7 @@ with tab1:
         with col3:
             with st.spinner('Processing PDFs...'):
                 # processed_files = process_pdfs(uploaded_files)
-                time.sleep(1)
+                time.sleep(3)
             st.success('Processing complete!')
             st.session_state.processed_files = True
 
