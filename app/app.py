@@ -82,7 +82,7 @@ def display_download_button():
 
 # ------------Page configs-----------------------------------------------------------------------
 st.set_page_config(layout='wide', page_title="Clean Data is All You Need", page_icon='📄', menu_items={
-        'Contact us': 'mailto:grndnl@berkeley.edu',
+        'Report a bug': 'mailto:grndnl@berkeley.edu',
     })
 
 
