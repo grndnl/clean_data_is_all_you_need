@@ -2,6 +2,8 @@
 
 <img src="example.png" alt="example" width="200"/>
 
+Process PDFs of scientific papers into structured data.
+
 
 ## Demo
 [Link](https://cleandataisallyouneed.streamlit.app/)
